@@ -6,7 +6,7 @@ background: linear-gradient(
     rgba(0, 0, 0, 0.4) 80%,
     rgba(0, 0, 0, 0) 100%
 );
-color: white;
+color: inherit;
 position: fixed;
 top: 0;
 left: 0;
@@ -16,12 +16,14 @@ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
 /* Navbar Top */
 .headerMobile-navbar {
-display: flex;
-justify-content: space-between;
-align-items: center;
-padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
 }
-
+.headerMobile-navbar, .headerMobile-search, .item-userMobile, .item-cartMobile {
+    color: white; 
+}
 .headerMobile-navbar_logo img {
     height: 35px;
 }
