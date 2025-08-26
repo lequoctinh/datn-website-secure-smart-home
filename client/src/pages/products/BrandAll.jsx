@@ -1,6 +1,8 @@
 import React from "react";
 import { Link, useParams } from "react-router-dom";
 import { products } from "./data/products";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 import "./css/ProductSmartLock.css";
 import './css/BrandAll.css'
 
@@ -18,14 +20,18 @@ function ProductCard({ product, uniqueKey }) {
 return (
 <div key={uniqueKey} className="SLP-card">
     <div className="SLP-thumb">
-    <img src={product.img} alt={product.title} loading="lazy" />
-    </div>
-    <div className="SLP-info">
-    <Link to={product.to} className="SLP-title">{product.title}</Link>
-    <div className="SLP-prices">
-        <span className="SLP-price">{product.price}</span>
-        {product.old && <span className="SLP-price-old">{product.old}</span>}
-    </div>
+        <img src={product.img} alt={product.title} loading="lazy" />
+        </div>
+        <div className="SLP-info">
+        <Link to={product.to} className="SLP-title">{product.title}</Link>
+        <div className="SLP-prices">
+            <span className="SLP-price">{product.price}</span>
+            {product.old && <span className="SLP-price-old">{product.old}</span>}
+        </div>
+        <div className="SLP-actions">
+            <button type="button" className="SLP-compare">So sánh</button>
+            <button type="button" className="SLP-cart" aria-label="Thêm vào giỏ"><FontAwesomeIcon icon={faShoppingCart} /></button>
+        </div>
     </div>
 </div>
 );
