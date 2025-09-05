@@ -1,16 +1,42 @@
 const jwt = require("jsonwebtoken");
-const JWT_SECRET = process.env.JWT_SECRET;
 
-module.exports = function auth(req, res, next) {
-  const authHeader = req.headers.authorization || "";
-  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
-  if (!token) return res.status(401).json({ error: "Thiếu token" });
+const COOKIE = process.env.COOKIE_NAME || "token";
 
+function signToken(payload) {
+  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "7d" });
+}
+
+function setAuthCookie(res, token) {
+  const isProd = process.env.NODE_ENV === "production";
+  res.cookie(COOKIE, token, {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    path: "/",
+  });
+}
+
+function clearAuthCookie(res) {
+  const isProd = process.env.NODE_ENV === "production";
+  res.clearCookie(COOKIE, {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
+    path: "/",
+  });
+}
+
+function requireAuth(req, res, next) {
   try {
-    const payload = jwt.verify(token, JWT_SECRET);
-    req.user = { id: payload.id, role: payload.role };
+    const token = req.cookies[COOKIE];
+    if (!token) return res.status(401).json({ error: "Chưa đăng nhập" });
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded; 
     next();
   } catch {
-    return res.status(401).json({ error: "Token không hợp lệ / hết hạn" });
+    return res.status(401).json({ error: "Token không hợp lệ" });
   }
-};
+}
+
+module.exports = { signToken, setAuthCookie, clearAuthCookie, requireAuth };
