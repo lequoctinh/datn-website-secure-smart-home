@@ -1,180 +1,182 @@
-
-
-/* ========= BIẾN CHUNG ========= */
 :root {
-    --brand-gold: #b88e2f;
-    --brand-red:  #D72C2C;
-    --text-dark:  #222;
-    --text-dim:   #555;
-    --card-bg:    #fff;
-    --card-border: rgba(0,0,0,.06);
-    --shadow:     0 8px 20px rgba(0,0,0,.06);
+  --brand-gold: #b88e2f;
+  --brand-red:  #D72C2C;
+  --text-dark:  #222;
+  --text-dim:   #555;
+  --card-bg:    #fff;
+  --card-border: rgba(0,0,0,.06);
+  --shadow:     0 8px 20px rgba(0,0,0,.06);
 }
-
-.Container-Contact {
-    background: #f3f1f1ec;
-
-}
-
-.ProductSmartLock-BannerPage { width: 100%; }
-.ProductSmartLock-BannerPage img {
-    width: 100%;
-    height: 300px;
-    display: block;
-    object-fit: cover;
-}
-
-.ProductSmartLock-Content
- {
+.box-contact {
     max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-.ProductSmartLock-Content {
-    background: #fff;              
-    padding: 10px 16px;               
-    border-radius: 8px;              
-    box-shadow: 0 4px 12px rgba(0,0,0,.08); 
-    margin-top: -40px;                
-    position: relative;
-    z-index: 2;                     
-}
-
-.ProductSmartLock-Content .PSL-crumb { 
-    color: var(--text-dark);
-}
-.ProductSmartLock-Content .PSL-crumb-active {
-    color: var(--brand-gold);
-}
-
-.PSL-crumb {
-    color: var(--text-dim);
-    text-decoration: none;
-    font-weight: 600;
-    transition: color .2s;
-}
-.PSL-crumb:hover { color: var(--brand-gold); }
-.PSL-crumb-active { color: var(--brand-gold); }
-.PSL-sep { color:#999; font-size:12px; }
-@media (min-width:640px){ .PSL-sep{ font-size:14px; } }
-
-/* màu của các item trong phần nội dung */
-.contact-item-Facebook a {
-    /* background-color: hsl(28.91deg 97.54% 68.03%); */
-    color: #3b5998;
-}
-
-.contact-item-TikTok a {
-    color: #000;
-    /* background-color: hsl(28.91deg 97.54% 68.03%); */
-}
-
-.contact-item-YouTube a {
-    color: #ff0000;
-    /* background-color: hsl(28.91deg 97.54% 68.03%); */
-}
-
-
-.Container-Contact {
-  width: 100%;
   margin: 0 auto;
 }
-
-
-.contact-content {
-  margin-top: 20px;
-}
-
-
-.contact-infor,
-.over-Contact_social-links,
-.contact-form {
-  border: 2px solid #ddd;   /* viền */
-  border-radius: 12px;      /* bo góc */
-  padding: 20px;            /* khoảng cách trong */
-  background-color: #fafafa; /* nền nhạt */
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05); /* đổ bóng nhẹ */
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.over-Contact_social-links{
-  padding: 10px 20px;
-}
-
-/* Hover hiệu ứng nổi nhẹ */
-.contact-infor:hover,
-.over-Contact_social-links:hover,
-.contact-form:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-/* Tiêu đề form hoặc social */
-.contact-form h2,
-.over-Contact_social-links h2 {
-  margin-bottom: 16px;
+.Contact-Intro {
   text-align: center;
-  color: #333;
+  padding: 20px 12px 8px;
+}
+.Contact-Intro h1 {
+  margin: 0 0 8px;
+  font-size: 26px;
+  color: var(--text-dark);
+}
+.Contact-Intro p {
+  margin: 0;
+  color: var(--text-dim);
+  line-height: 1.6;
 }
 
-/* Khoảng cách giữa dòng thông tin liên hệ */
-.contact-infor p {
-  margin-bottom: 8px;
-  font-size: 15px;
-  color: #444;
+.Contact-Grid {
+  display: grid;
+  gap: 16px;
+  padding: 16px 0 0;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 900px) {
+  .Contact-Grid { grid-template-columns: 1fr 1.3fr; }
 }
 
-/* Social link item */
-.over-Contact_social-links_item a {
-  display: inline-block;
-  padding: 8px;
+
+.Contact-Card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 18px;
+}
+
+.Contact-Info h2,
+.Contact-Form h2,
+.Contact-Map h2 {
+  font-size: 18px;
+  margin: 0 0 14px;
+  color: var(--text-dark);
+}
+
+.CI-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 10px 0;
+  border-bottom: 1px dashed #eee;
+}
+.CI-item:last-child { border-bottom: 0; }
+.CI-icon {
+  width: 36px; height: 36px; flex: 0 0 36px;
   border-radius: 50%;
-  background: hsl(0, 0%, 100%);
-  border: 1px solid #ddd;
-  transition: all 0.2s;
+  display: grid; place-items: center;
+  background: rgba(184,142,47,.12);
+  color: var(--brand-gold);
+  font-size: 14px;
 }
+.CI-text strong { color: var(--text-dark); }
+.CI-text a { color: var(--text-dim); text-decoration: none; }
+.CI-text a:hover { color: var(--text-dark); }
 
-.social-links_item a:hover {
-  background: #f0f0f0;
-  transform: scale(1.1);
+.CI-social {
+  display: flex; gap: 10px; margin-top: 12px;
 }
-#contact-item a{
-    background: hsl(28.9deg 92.43% 68.81%);
+.CI-social-btn {
+  width: 36px; height: 36px; display: grid; place-items: center;
+  border-radius: 10px; border: 1px solid #eee;
+  color: var(--text-dark);
+  transition: .2s;
 }
-#contact-item a:hover{
-    background: hsl(28.93deg 92.49% 58.24%);
-}
+.CI-social-btn:hover { transform: translateY(-2px); border-color: var(--brand-gold); color: var(--brand-gold); }
 
-
-
-
-
-/* Form input */
-.contact-form input,
-.contact-form textarea {
-  width: 100%;
-  border: 1px solid #ccc;
+.CI-note {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--text-dim);
+  background: #faf7ef;
+  border: 1px dashed rgba(184,142,47,.35);
+  padding: 8px 10px;
   border-radius: 8px;
-  padding: 10px;
-  font-size: 15px;
+}
+
+.Contact-Form form { margin-top: 6px; }
+.CF-row {
+  display: grid; gap: 12px;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 640px) {
+  .CF-row { grid-template-columns: 1fr 1fr; }
+}
+.CF-field { display: flex; flex-direction: column; gap: 6px; }
+.CF-field label { font-size: 13px; color: var(--text-dim); }
+.CF-field input,
+.CF-field select,
+.CF-field textarea {
+  border: 1px solid #e9e9e9;
+  border-radius: 10px;
+  padding: 10px 12px;
   outline: none;
-  transition: border-color 0.2s;
+  transition: .2s;
+  font-size: 14px;
+  background: #fff;
+}
+.CF-field textarea { resize: vertical; }
+.CF-field input:focus,
+.CF-field select:focus,
+.CF-field textarea:focus {
+  border-color: var(--brand-gold);
+  box-shadow: 0 0 0 3px rgba(184,142,47,.15);
+}
+.CF-submit {
+  width: 100%;
+  margin-top: 12px;
+  display: inline-flex; gap: 8px; align-items: center; justify-content: center;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, var(--brand-gold), #e3c170);
+  color: #fff; font-weight: 600; cursor: pointer; transition: transform .15s ease, filter .15s ease;
+}
+.CF-submit:hover { transform: translateY(-1px); filter: brightness(1.02); }
+.CF-submit:active { transform: translateY(0); }
+.CF-privacy {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--text-dim);
 }
 
-.contact-form input:focus,
-.contact-form textarea:focus {
-  border-color: #b37a00;
+.Contact-FAQ {
+  margin-top: 18px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
 }
+.Contact-FAQ h2 { margin: 0 0 8px; font-size: 18px; color: var(--text-dark); }
+.Contact-FAQ details {
+  border-top: 1px dashed #eee;
+  padding: 10px 0;
+}
+.Contact-FAQ details:first-of-type { border-top: 0; }
+.Contact-FAQ summary {
+  cursor: pointer; color: var(--text-dark); font-weight: 600;
+}
+.Contact-FAQ p { margin: 6px 0 0; color: var(--text-dim); }
 
-/* Nút gửi */
-.contact-form button {
-  background: #b88e2f;  
-  border-radius: 8px;
-  font-weight: 600;
+.Contact-CTA {
+  margin: 16px 0 24px;
 }
-.contact-form button:hover {
-    background-color: #bb8203;
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  }
-  
+.CTA-inner {
+  padding: 18px;
+  border-radius: 14px;
+  background: linear-gradient(120deg, rgba(184,142,47,.12), rgba(184,142,47,.04));
+  border: 1px solid rgba(184,142,47,.25);
+  text-align: center;
+}
+.CTA-inner h3 { margin: 0 0 4px; color: var(--text-dark); }
+.CTA-inner p  { margin: 0 0 10px; color: var(--text-dim); }
+.CTA-btn {
+  display: inline-block;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--brand-gold);
+  color: #fff; text-decoration: none; font-weight: 600;
+  transition: .2s;
+}
+.CTA-btn:hover { filter: brightness(1.05); }
