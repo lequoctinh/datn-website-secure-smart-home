@@ -1,171 +1,174 @@
-import { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleRight, faShoppingCart } from "@fortawesome/free-solid-svg-icons"
 import {
-    faFacebookF,
-    faYoutube,
-    faTiktok,
-    } from "@fortawesome/free-brands-svg-icons";
+faAngleRight,
+faPhone,
+faEnvelope,
+faLocationDot,
+faClock,
+faPaperPlane,
+} from "@fortawesome/free-solid-svg-icons";
+import { faFacebookF, faYoutube, faTiktok } from "@fortawesome/free-brands-svg-icons";
 import './css/contact.css';
-
 function Contact() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    message: "",
-  });
-
-  const [successMessage, setSuccessMessage] = useState(""); // state để lưu thông báo
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setSuccessMessage(`🎉 Cảm ơn ${formData.name}, chúng tôi đã nhận được thông tin của bạn! Chúng tôi sẽ liên hệ với bạn sớm nhất.`);
-
-    // reset form sau khi gửi
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      message: "",
-    });
-  };
-
-  return (
-    <div className="Container-Contact">
-         <div className="ProductSmartLock-BannerPage">
-            <img src="/productpage/banner-page/banner-pages.png" alt="" />
-        </div>
-
-        <div className="ProductSmartLock-Content">
-            <nav className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base" aria-label="Breadcrumb">
-                <Link to="/" className="PSL-crumb">
-                    <span>Trang Chủ</span>
-                </Link>
-                <FontAwesomeIcon icon={faAngleRight} className="PSL-sep" />
-                <Link to="/lien-he" className="PSL-crumb PSL-crumb-active">
-                    <span>Liên hệ</span>
-                </Link>
-            </nav>
-        </div>
-
-        <div className="contact-content p-6 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-            
-
-            <div className="contact-infor ">
-                <h2 className="text-2xl font-bold mb-6 text-center">
-                    SECURE SMART HOME – AN TOÀN & ĐẲNG CẤP CHUẨN HÀN
-                </h2>
-                <p>📍 Địa chỉ: 123 Đường ABC, xxx, xxx, TP.HCM</p>
-                <p>📞 Hotline: 0123 456 789</p>
-                <p>📞 Hotline: 0098 765 432</p>
-                <p>📧 Email: securesmarthome@gmail.com</p>
-            </div>
-
-            <div className="over-Contact_social-links flex flex-col items-center gap-4">
-                <div className="logo-contact">
-                    <img src="/SecureHome.png" alt="Logo footer" className="h-14" />
-                </div>
-                <h2 className="text-2xl font-bold mb-6 text-center">
-                    Liên kết với chúng tôi
-                </h2>
-                <div className="social-links_item flex gap-4 text-xl" id="contact-item">
-                    <div className="contact-item-Facebook text-[#3b5998]">
-                        <a href="https://www.facebook.com/Lequoctinh2512/" target="_blank" rel="noopener noreferrer">
-                            <FontAwesomeIcon icon={faFacebookF} />
-                        </a>
-                    </div>
-                    <div className="contact-item-TikTok text-black">
-                        <a href="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer">
-                            <FontAwesomeIcon icon={faTiktok} />
-                        </a>
-                    </div>
-                    <div className="contact-item-YouTube text-[#ff0000]">
-                        <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">
-                            <FontAwesomeIcon icon={faYoutube} />
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <form onSubmit={handleSubmit} className="contact-form flex flex-col gap-4">
-                <h2 className="text-2xl font-bold mb-6 text-center">
-                    Liên hệ với chúng tôi
-                </h2>
-                <input
-                type="text"
-                name="name"
-                placeholder="Họ và tên"
-                className="border p-2 rounded"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                />
-                <input
-                type="email"
-                name="email"
-                placeholder="Email"
-                className="border p-2 rounded"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                />
-                <input
-                type="tel"
-                name="phone"
-                placeholder="Số điện thoại"
-                className="border p-2 rounded"
-                value={formData.phone}
-                onChange={handleChange}
-                required
-                pattern="0[0-9]{9}"
-                title="Số điện thoại phải gồm 10 chữ số"
-                />
-                <textarea
-                name="message"
-                placeholder="Nội dung"
-                className="border p-2 rounded"
-                rows="4"
-                value={formData.message}
-                onChange={handleChange}
-                required
-                ></textarea>
-
-                <button
-                type="submit"
-                className="text-white p-2 rounded "
-                >
-                Gửi liên hệ
-                </button>
-                {successMessage && (
-                    <p className="text-green-600 font-semibold mt-4">{successMessage}</p>
-                )}
-            </form>
-        </div>
+return (
+<div className="Container-Contact">
+    <div className="ProductSmartLock-BannerPage">
+        <img src="/productpage/banner-page/banner-pages.png" alt="" />
     </div>
-  );
+    <div className="ProductSmartLock-Content">
+        <nav className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base" aria-label="Breadcrumb">
+        <Link to="/" className="PSL-crumb">
+            <span>Trang Chủ</span>
+        </Link>
+        <FontAwesomeIcon icon={faAngleRight} className="PSL-sep" />
+        <Link to="/lien-he" className="PSL-crumb PSL-crumb-active">
+            <span>Liên hệ</span>
+        </Link>
+        </nav>
+    </div>
+    <div className="box-contact"> 
+        <section className="Contact-Intro">
+            <h1>Liên hệ Secure Smart Home</h1>
+            <p>
+            Cần tư vấn khóa thông minh, camera, cửa nhựa composite hay phụ kiện?
+            Điền form hoặc gọi trực tiếp – chúng tôi phản hồi trong giờ làm việc.
+            </p>
+        </section>
+
+        <section className="Contact-Grid">
+            <aside className="Contact-Card Contact-Info">
+            <h2>Thông tin liên hệ</h2>
+
+            <div className="CI-item">
+                <div className="CI-icon">
+                <FontAwesomeIcon icon={faLocationDot} />
+                </div>
+                <div className="CI-text">
+                <strong>Địa chỉ:</strong>
+                <span> 123 Tô Kí, Quận 12, TP.HCM</span>
+                </div>
+            </div>
+
+            <div className="CI-item">
+                <div className="CI-icon">
+                <FontAwesomeIcon icon={faPhone} />
+                </div>
+                <div className="CI-text">
+                <strong>Hotline:</strong>
+                <a href="tel:0900000000"> 0900 000 000</a>
+                </div>
+            </div>
+
+            <div className="CI-item">
+                <div className="CI-icon">
+                <FontAwesomeIcon icon={faEnvelope} />
+                </div>
+                <div className="CI-text">
+                <strong>Email:</strong>
+                <a href="#"> securesmarthome@gmail.com</a>
+                </div>
+            </div>
+
+            <div className="CI-item">
+                <div className="CI-icon">
+                <FontAwesomeIcon icon={faClock} />
+                </div>
+                <div className="CI-text">
+                <strong>Giờ làm việc:</strong>
+                <span> Thứ 2 – Thứ 7: 08:30 – 18:00</span>
+                </div>
+            </div>
+
+            <div className="CI-social">
+                <a href="#" aria-label="Facebook" className="CI-social-btn">
+                <FontAwesomeIcon icon={faFacebookF} />
+                </a>
+                <a href="#" aria-label="YouTube" className="CI-social-btn">
+                <FontAwesomeIcon icon={faYoutube} />
+                </a>
+                <a href="#" aria-label="TikTok" className="CI-social-btn">
+                <FontAwesomeIcon icon={faTiktok} />
+                </a>
+            </div>
+
+            <div className="CI-note">
+                * Gọi trước khi đến để được phục vụ nhanh hơn.
+            </div>
+            </aside>
+
+            <div className="Contact-Card Contact-Form">
+                <h2>Gửi yêu cầu tư vấn</h2>
+                <form>
+                    <div className="CF-row">
+                    <div className="CF-field">
+                        <label htmlFor="fullname">Họ & tên</label>
+                        <input id="fullname" type="text" placeholder="VD: Nguyễn Văn A" />
+                    </div>
+                    <div className="CF-field">
+                        <label htmlFor="phone">Số điện thoại</label>
+                        <input id="phone" type="tel" placeholder="VD: 09xx xxx xxx" />
+                    </div>
+                    </div>
+
+                    <div className="CF-row">
+                    <div className="CF-field">
+                        <label htmlFor="email">Email</label>
+                        <input id="email" type="email" placeholder="you@example.com" />
+                    </div>
+                    <div className="CF-field">
+                        <label htmlFor="topic">Nhu cầu</label>
+                        <select id="topic" defaultValue="">
+                        <option value="" disabled>Chọn hạng mục</option>
+                        <option>Khóa cửa thông minh</option>
+                        <option>Camera giám sát</option>
+                        <option>Cửa nhựa composite</option>
+                        <option>Phụ kiện</option>
+                        <option>Khác</option>
+                        </select>
+                    </div>
+                    </div>
+
+                    <div className="CF-field">
+                    <label htmlFor="message">Nội dung</label>
+                    <textarea id="message" rows={5} placeholder="Mô tả ngắn gọn nhu cầu của bạn…" />
+                    </div>
+
+                    <button type="button" className="CF-submit">
+                    <FontAwesomeIcon icon={faPaperPlane} />
+                    <span>Gửi yêu cầu</span>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <section className="Contact-FAQ">
+            <h2>Câu hỏi thường gặp</h2>
+            <details>
+            <summary>Thời gian lắp đặt trong bao lâu?</summary>
+            <p>Thường từ 1–2 giờ cho khóa cửa, 2–4 giờ cho bộ camera 2–4 mắt.</p>
+            </details>
+            <details>
+            <summary>Bảo hành như thế nào?</summary>
+            <p>Bảo hành 12–24 tháng tùy hãng, hỗ trợ kỹ thuật trong giờ làm việc.</p>
+            </details>
+            <details>
+            <summary>Có khảo sát tận nơi không?</summary>
+            <p>Có, vui lòng để lại thông tin – chúng tôi sẽ hẹn lịch khảo sát.</p>
+            </details>
+        </section>
+
+        <section className="Contact-CTA">
+            <div className="CTA-inner">
+            <h3>Sẵn sàng nâng cấp ngôi nhà của bạn?</h3>
+            <p>Gọi ngay để được kỹ thuật viên tư vấn giải pháp phù hợp nhất.</p>
+            <a className="CTA-btn" href="tel:0900000000">Gọi 0900 000 000</a>
+            </div>
+        </section>
+    </div>
+</div>
+);
 }
 
 export default Contact;
-
-
-
-
-{/* <div className="contact-map mb-8">
-                <iframe
-                title="Google Map"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3918.4355252855394!2d106.6248237114372!3d10.854441557703524!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752bee0b0ef9e5%3A0x5b4da59e47aa97a8!2zQ8O0bmcgVmnDqm4gUGjhuqduIE3hu4FtIFF1YW5nIFRydW5n!5e0!3m2!1svi!2s!4v1755657555973!5m2!1svi!2s"
-                width="100%"
-                height="300"
-                style={{ border: 0 }}
-                allowFullScreen=""
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                ></iframe>
-            </div> */}
