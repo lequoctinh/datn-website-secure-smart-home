@@ -33,7 +33,7 @@ return (
         </div>
 
         {mode === "login" ? (
-        <form className="auth-form" onSubmit={(e) => { e.preventDefault(); /* TODO: login */ }}>
+        <form className="auth-form" onSubmit={(e) => { e.preventDefault(); }}>
             <div className="auth-field"><label>Email</label><input type="email" placeholder="you@gmail.com" required /></div>
                 <div className="auth-field">
                 <label>Mật khẩu</label>
@@ -48,16 +48,17 @@ return (
             </div>
         </form>
         ) : (
-        <form className="auth-form" onSubmit={(e) => { e.preventDefault(); /* TODO: register */ }}>
-            <div className="auth-field"><label>Họ tên</label><input type="text" placeholder="Nguyễn Văn A" required /></div>
-                <div className="auth-field"><label>Email</label><input type="email" placeholder="you@gmail.com" required /></div>
+        <form className="auth-form" onSubmit={(e) => { e.preventDefault(); }}>
                 <div className="auth-field">
-                <label>Mật khẩu</label>
-                <div className="auth-pw">
-                    <input type={showPw ? "text" : "password"} placeholder="Tối thiểu 8 ký tự" required minLength={8} />
-                    <button className="auth-pw-toggle" type="button" onClick={() => setShowPw((s) => !s)}>{showPw ? "Ẩn" : "Hiện"}</button>
+                    <label>Email</label><input type="email" placeholder="you@gmail.com" required />
                 </div>
-            </div>
+                <div className="auth-field">
+                    <label>Mật khẩu</label>
+                    <div className="auth-pw">
+                        <input type={showPw ? "text" : "password"} placeholder="Tối thiểu 8 ký tự" required minLength={8} />
+                        <button className="auth-pw-toggle" type="button" onClick={() => setShowPw((s) => !s)}>{showPw ? "Ẩn" : "Hiện"}</button>
+                    </div>
+                </div>
                 <div className="auth-actions">
                 <button className="auth-submit" type="submit">Tạo tài khoản</button>
                 <button className="auth-link" type="button" onClick={() => setMode("login")}>Đã có tài khoản? Đăng nhập</button>
