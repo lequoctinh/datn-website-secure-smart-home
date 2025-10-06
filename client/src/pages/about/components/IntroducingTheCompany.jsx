@@ -28,7 +28,7 @@ function AboutTeam() {
 
   return (
     <section className="py-20 bg-gradient-to-b from-gray-100 to-white">
-      <div className="container mx-auto px-4">
+      {/* <div className="container mx-auto px-4">
         <h2
           data-aos="fade-up"
           className="text_top text-center text-3xl font-bold md:text-4xl"
@@ -53,7 +53,7 @@ function AboutTeam() {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
     </section>
   );
 }

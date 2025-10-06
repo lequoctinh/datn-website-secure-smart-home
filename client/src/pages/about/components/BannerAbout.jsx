@@ -2,6 +2,7 @@ import React from "react";
 import "swiper/css";
 import "swiper/css/pagination";
 import "./css/BannerAbout.css";
+import { Link } from "react-router-dom";
 
 function BannerAbout() {
 
@@ -24,7 +25,9 @@ return (
         <div className="absolute inset-0 flex items-center justify-center">
             <h2 className="text_banner text-2xl sm:text-3xl md:text-5xl lg:text-6xl 
                             font-bold text-white drop-shadow-lg text-center px-4">
-                Giới thiệu
+                <Link to="/lien-he" className="hover:text-amber-400 transition-colors duration-300">
+                    Giới thiệu
+                </Link>
             </h2>
         </div>
     </div>
