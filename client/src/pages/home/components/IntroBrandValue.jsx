@@ -20,7 +20,7 @@ return (
         <h2 className="text-heading">THÂN GỬI</h2>
 
         <span className="text-subheading">
-            GIÁ TRỊ CỐT LÕI MÀ <strong className="highlight">SECURE SMART HOME</strong> MANG LẠI CHO NGÔI NHÀ BẠN
+            GIÁ TRỊ CỐT LÕI MÀ <strong className="highlight">NEXAHOME</strong> MANG LẠI CHO NGÔI NHÀ BẠN
         </span>
 
         <p className="text-paragraph">
@@ -29,13 +29,13 @@ return (
         </p>
 
         <p className="text-paragraph">
-            <strong className="highlight">SECURE SMART HOME</strong> mang đến các giải pháp thông minh như khóa cửa điện tử,
+            <strong className="highlight">NEXAHOME</strong> mang đến các giải pháp thông minh như khóa cửa điện tử,
             cửa nhựa an toàn, giúp bạn kiểm soát ngôi nhà dễ dàng, bảo vệ người thân, và tận hưởng trọn vẹn từng phút giây bên gia đình.
         </p>
 
         <p className="text-paragraph">
             Chúng tôi hiểu rằng, công nghệ chỉ có ý nghĩa khi phục vụ cho hạnh phúc con người. Đó là lý do mỗi sản phẩm
-            <strong className="highlight"> SECURE SMART HOME</strong> đều được phát triển để trở thành người bạn đồng hành
+            <strong className="highlight"> NEXAHOME</strong> đều được phát triển để trở thành người bạn đồng hành
             tin cậy trong tổ ấm của bạn – hôm nay và cả mai sau.
         </p>
         </div>

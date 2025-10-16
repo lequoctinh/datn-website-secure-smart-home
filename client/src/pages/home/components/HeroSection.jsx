@@ -35,8 +35,8 @@ return (
             </Swiper>
         </div>
         <div className="HeroSection-banner_content">
-            <h2>AN TOÀN MỖI NGÀY - KHỞI ĐẦU HẠNH PHÚC CÙNG SECURE SMART HOME</h2>
-            <p>Hãy để ngôi nhà của bạn trở thành nơi đáng sống nhất – với những giải pháp thông minh và tinh tế từ SecureHome!</p>
+            <h2>AN TOÀN MỖI NGÀY - KHỞI ĐẦU HẠNH PHÚC CÙNG NEXA HOME</h2>
+            <p>Hãy để ngôi nhà của bạn trở thành nơi đáng sống nhất – với những giải pháp thông minh và tinh tế từ NexaHome!</p>
             <input type="text"  placeholder="Số điện thoại"/>
             <button className="submit-advise">Đăng kí tư vấn</button>
         </div>
