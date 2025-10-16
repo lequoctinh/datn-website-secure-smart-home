@@ -1,17 +1,20 @@
 const jwt = require("jsonwebtoken");
+const JWT_SECRET = process.env.JWT_SECRET || "dev_secret";
 
-module.exports = (req, res, next) => {
-  const token = req.headers["authorization"]?.split(" ")[1];
+module.exports = function auth(req, _res, next) {
+const bearer = req.headers.authorization?.split(" ");
+const cookieToken = req.cookies?.token;
+let token = null;
 
-  if (!token) {
-    return res.status(401).json({ thongbao: "Ban chua dang nhap" });
-  }
+if (bearer && bearer[0] === "Bearer") token = bearer[1];
+if (!token && cookieToken) token = cookieToken;
 
-  try {
-    const decode = jwt.verify(token, process.env.JWT_SECRET || "secret");
-    req.nguoidung = decode; // lưu thông tin user vào request
-    next();
-  } catch (err) {
-    return res.status(403).json({ thongbao: "Token khong hop le" });
-  }
+if (!token) { req.user = null; return next(); }
+
+try {
+    req.user = jwt.verify(token, JWT_SECRET); 
+} catch {
+    req.user = null;
+}
+next();
 };
