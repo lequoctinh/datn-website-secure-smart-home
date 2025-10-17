@@ -55,12 +55,14 @@ useEffect(() => {
           body: JSON.stringify({ credential: response.credential }),
         });
         const data = await r.json();
+        if (r.status === 202) {
+          toast.info(data.message || "Vui lòng kiểm tra email để xác minh.");
+          navigate("/dang-nhap?tab=login&verifySent=1", { replace: true });
+          return;
+        }
         if (!r.ok) throw new Error(data.message || "Google login failed");
 
-        toast.success("Đăng nhập Google thành công!", {
-          autoClose: 1200,
-          onClose: () => navigate(0),
-        });
+        toast.success("Đăng nhập Google thành công!", { autoClose: 1200, onClose: () => navigate(0) });
         navigate("/tai-khoan", { replace: true });
       } catch (e) {
         console.error("GOOGLE LOGIN ERROR:", e?.message || e);
