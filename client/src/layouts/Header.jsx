@@ -61,6 +61,7 @@ return (
             {menuOpen && (
             <nav className="tabletMenu px-2 pb-2">
                 <ul className="tabletMenu-list space-y-2">
+                 <li><Link to="/tin-tuc" onClick={closeAllTablet}>Tin tức</Link></li>   
                 <li><Link to="/ve-chung-toi" onClick={closeAllTablet}>Về chúng tôi</Link></li>
 
                 <li className="tablet-dd">
@@ -155,8 +156,9 @@ return (
 );
 }
 
-const renderMenu = () => (
+const renderMenu = () => ( 
 <>
+    <li><Link to="/tin-tuc">Tin tức</Link></li>
     <li><Link to="/ve-chung-toi">Về chúng tôi</Link></li>
     <li className="relative group">
         <Link to="#">Khóa cửa thông minh <FontAwesomeIcon icon={faAngleDown} /></Link>

@@ -1,0 +1,162 @@
+.Container-News {
+  background-color: #fff;
+  font-family: "Inter", sans-serif;
+  color: #333;
+}
+
+.News-Content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 40px;
+  max-width: 1200px;
+  margin: 60px auto;
+  padding: 0 20px;
+}
+
+.News-Main h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: #222;
+}
+
+.News-Grid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.News-Card {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+.News-Card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  border-color: #f5b300;
+}
+
+.News-Image img {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+}
+
+.News-Body {
+  padding: 20px;
+}
+
+.News-Body h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.News-Body h2 a {
+  color: #222;
+  text-decoration: none;
+}
+.News-Body h2 a:hover {
+  color: #f5b300;
+}
+
+.News-Meta {
+  display: flex;
+  gap: 16px;
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 10px;
+}
+
+.News-ReadMore {
+  display: inline-block;
+  margin-top: 10px;
+  color: #f5b300;
+  font-weight: 600;
+  text-decoration: none;
+}
+.News-ReadMore:hover {
+  text-decoration: underline;
+}
+
+/* Sidebar */
+.News-Sidebar .Sidebar-Box {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+.Sidebar-Box h3 {
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+  color: #222;
+}
+.Sidebar-Box ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.Sidebar-Box li {
+  margin-bottom: 8px;
+}
+.Sidebar-Box a {
+  text-decoration: none;
+  color: #555;
+}
+.Sidebar-Box a:hover {
+  color: #f5b300;
+}
+.Sidebar-Box form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.Sidebar-Box input {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+.Sidebar-Box button {
+  background-color: #f5b300;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.Sidebar-Box button:hover {
+  background-color: #d99e00;
+}
+
+/* CTA Section */
+.Contact-CTA {
+  background: #f5b300;
+  color: #fff;
+  text-align: center;
+  padding: 60px 20px;
+  margin-top: 60px;
+}
+.CTA-inner h3 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.CTA-btn {
+  display: inline-block;
+  background: #fff;
+  color: #f5b300;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-weight: 600;
+  margin-top: 16px;
+  text-decoration: none;
+}
+.CTA-btn:hover {
+  background: #fff5db;
+}
