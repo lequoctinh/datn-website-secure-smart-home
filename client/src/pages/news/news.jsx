@@ -11,7 +11,7 @@ function News() {
       title: "Khóa cửa thông minh – xu hướng an toàn cho ngôi nhà hiện đại",
       date: "20/10/2025",
       author: "Admin",
-      image: "/news/smartlock-1.jpg",
+      image: "/news/Khoa-cua-thong-minh-Xiaomi-Lockin-X9-bigmivn-1.webp",
       desc: "Khóa cửa thông minh đang trở thành lựa chọn hàng đầu cho gia đình trẻ hiện nay. Không chỉ tiện lợi, dòng khóa này còn giúp đảm bảo an toàn tối đa cho tổ ấm của bạn.",
     },
     {
@@ -19,7 +19,7 @@ function News() {
       title: "So sánh giữa khóa vân tay và khóa thẻ từ – loại nào phù hợp hơn?",
       date: "15/10/2025",
       author: "Admin",
-      image: "/news/smartlock-compare.jpg",
+      image: "/news/Khoa-cua-thong-minh-Xiaomi-Lockin-X9-bigmivn-1.webp",
       desc: "Bạn đang phân vân giữa khóa vân tay và khóa thẻ từ? Cùng tìm hiểu sự khác biệt và lựa chọn giải pháp phù hợp nhất cho ngôi nhà của bạn.",
     },
     {
@@ -27,9 +27,50 @@ function News() {
       title: "Hướng dẫn sử dụng ứng dụng điều khiển khóa từ xa",
       date: "05/10/2025",
       author: "Admin",
-      image: "/news/smartapp.jpg",
+      image: "/news/Khoa-cua-thong-minh-Xiaomi-Lockin-X9-bigmivn-1.webp",
       desc: "Chỉ với vài thao tác, bạn có thể mở khóa, kiểm tra lịch sử ra vào và chia sẻ quyền truy cập cho người thân – tất cả ngay trên điện thoại.",
     },
+    {
+      id: 4,
+      title: "Hướng dẫn sử dụng ứng dụng điều khiển khóa từ xa",
+      date: "05/10/2025",
+      author: "Admin",
+      image: "/news/Khoa-cua-thong-minh-Xiaomi-Lockin-X9-bigmivn-1.webp",
+      desc: "Chỉ với vài thao tác, bạn có thể mở khóa, kiểm tra lịch sử ra vào và chia sẻ quyền truy cập cho người thân – tất cả ngay trên điện thoại.",
+    },
+    {
+      id: 5,
+      title: "Hướng dẫn sử dụng ứng dụng điều khiển khóa từ xa",
+      date: "05/10/2025",
+      author: "Admin",
+      image: "/news/Khoa-cua-thong-minh-Xiaomi-Lockin-X9-bigmivn-1.webp",
+      desc: "Chỉ với vài thao tác, bạn có thể mở khóa, kiểm tra lịch sử ra vào và chia sẻ quyền truy cập cho người thân – tất cả ngay trên điện thoại.",
+    },
+    {
+      id: 6,
+      title: "Hướng dẫn sử dụng ứng dụng điều khiển khóa từ xa",
+      date: "05/10/2025",
+      author: "Admin",
+      image: "/news/Khoa-cua-thong-minh-Xiaomi-Lockin-X9-bigmivn-1.webp",
+      desc: "Chỉ với vài thao tác, bạn có thể mở khóa, kiểm tra lịch sử ra vào và chia sẻ quyền truy cập cho người thân – tất cả ngay trên điện thoại.",
+    },
+    {
+      id: 7,
+      title: "Hướng dẫn sử dụng ứng dụng điều khiển khóa từ xa",
+      date: "05/10/2025",
+      author: "Admin",
+      image: "/news/Khoa-cua-thong-minh-Xiaomi-Lockin-X9-bigmivn-1.webp",
+      desc: "Chỉ với vài thao tác, bạn có thể mở khóa, kiểm tra lịch sử ra vào và chia sẻ quyền truy cập cho người thân – tất cả ngay trên điện thoại.",
+    },
+    {
+      id: 8,
+      title: "Hướng dẫn sử dụng ứng dụng điều khiển khóa từ xa",
+      date: "05/10/2025",
+      author: "Admin",
+      image: "/news/Khoa-cua-thong-minh-Xiaomi-Lockin-X9-bigmivn-1.webp",
+      desc: "Chỉ với vài thao tác, bạn có thể mở khóa, kiểm tra lịch sử ra vào và chia sẻ quyền truy cập cho người thân – tất cả ngay trên điện thoại.",
+    },
+
   ];
 
   return (
@@ -56,7 +97,8 @@ function News() {
       </div>
 
       {/* Nội dung chính */}
-      <div className="News-Content">
+      <div className="new-contai">
+        <div className="News-Content">
         <section className="News-Main">
           <h1>Tin tức & Bài viết mới nhất</h1>
           <div className="News-Grid">
@@ -113,6 +155,7 @@ function News() {
             </form>
           </div>
         </aside>
+      </div>
       </div>
 
       {/* Phần CTA cuối trang */}
