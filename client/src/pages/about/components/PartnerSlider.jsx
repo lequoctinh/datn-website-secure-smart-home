@@ -4,6 +4,7 @@ import "aos/dist/aos.css";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import "./css/PartnerSlider.css";
 
 function PartnerSlider() {
   useEffect(() => {
@@ -21,8 +22,35 @@ function PartnerSlider() {
     arrows: false,
     focusOnSelect: true,
     responsive: [
-      { breakpoint: 1024, settings: { slidesToShow: 3, centerMode: true } },
-      { breakpoint: 768, settings: { slidesToShow: 1, centerMode: false } },
+      {
+        breakpoint: 1280, // laptop nhỏ
+        settings: {
+          slidesToShow: 3,
+          centerMode: true,
+        },
+      },
+      {
+        breakpoint: 1024, // tablet ngang
+        settings: {
+          slidesToShow: 2,
+          centerMode: false,
+        },
+      },
+      {
+        breakpoint: 768, // tablet dọc
+        settings: {
+          slidesToShow: 1,
+          centerMode: false,
+        },
+      },
+      {
+        breakpoint: 480, // mobile
+        settings: {
+          slidesToShow: 1,
+          centerMode: false,
+          dots: true,
+        },
+      },
     ],
   };
 

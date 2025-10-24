@@ -45,3 +45,27 @@
     font-size: 1rem;
   }
 }
+/* Giúp ảnh không bị méo và hiển thị đẹp hơn trên mobile */
+@media (max-width: 768px) {
+  img {
+    border-radius: 1rem;
+    width: 90%;
+    height: auto;
+  }
+
+  .text_top {
+    font-size: 1.6rem;
+  }
+}
+
+/* Nhỏ hơn 480px (mobile nhỏ) */
+@media (max-width: 480px) {
+  section {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+
+  p {
+    font-size: 0.9rem;
+  }
+}
