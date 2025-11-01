@@ -10,6 +10,8 @@ import AuthPage from "./pages/auth/auth";
 import Taikhoan from "./pages/account/TaiKhoan";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import CartPage from "./pages/cart/CartPage";
+import OrderHistoryPage from "./pages/cart/OrderHistoryPage";
 
 function App() {
   return (
@@ -34,6 +36,9 @@ function App() {
         <Route path="/dang-nhap" element={<AuthPage />} />
         <Route path="/dang-ky" element={<AuthPage />} />
         <Route path="/tai-khoan" element={<Taikhoan />} />
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/order-history" element={<OrderHistoryPage />} />
+
       </Routes>
     </Layout>
   );
