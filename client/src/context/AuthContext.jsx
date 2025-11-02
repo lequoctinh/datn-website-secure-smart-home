@@ -1,48 +1,68 @@
-
-import React, { createContext, useContext, useEffect, useRef, useState } from "react";
+import React, {
+    createContext,
+    useContext,
+    useEffect,
+    useMemo,
+    useCallback,
+    useState,
+} from "react";
 import { api } from "../lib/api";
 
 const AuthCtx = createContext(null);
 
 export function AuthProvider({ children }) {
-const [me, setMe] = useState(null);
-const [loading, setLoading] = useState(true);
-const fetched = useRef(false);
+const [user, setUser] = useState(null);
+const [authLoading, setAuthLoading] = useState(true);
+const [error, setError] = useState(null);
 
-async function fetchMe() {
+const refresh = useCallback(async () => {
+    setAuthLoading(true);
+    setError(null);
     try {
-    const r = await api("/auth/me", { method: "GET", withCred: true });
-    setMe(r?.data?.user || r?.user || null);
-    } catch {
-    setMe(null);
+    const res = await api("/auth/me", { method: "GET", withCred: true });
+    setUser(res?.data?.user || res?.user || null);
+    } catch (e) {
+    setUser(null);
+    setError(e);
     } finally {
-    setLoading(false);
+    setAuthLoading(false);
     }
-}
-
-async function logout() {
-    try {
-        await api("/auth/logout", { method: "POST", withCred: true });
-    } catch (err) {
-        console.error("Logout failed:", err);
-    } finally {
-        setMe(null); 
-    }
-}
-
-useEffect(() => {
-    if (fetched.current) return;
-    fetched.current = true;
-    fetchMe();
 }, []);
 
-return (
-    <AuthCtx.Provider
-    value={{ me, setMe, loading, logout, refetchMe: fetchMe }}
-    >
-    {children}
-    </AuthCtx.Provider>
+const logout = useCallback(async () => {
+    try {
+    await api("/auth/logout", { method: "POST", withCred: true });
+    } catch (e) {
+    console.error("Logout failed:", e);
+    } finally {
+    setUser(null);
+    }
+}, []);
+
+useEffect(() => {
+    refresh();
+}, [refresh]);
+
+const isAdmin = user?.vai_tro === "admin";
+
+
+const value = useMemo(
+    () => ({
+    user,
+    setUser,
+    authLoading,
+    error,
+    isAdmin,
+    refresh,
+    logout,
+    me: user,
+    loading: authLoading,
+    refetchMe: refresh,
+    }),
+    [user, authLoading, error, isAdmin, refresh, logout]
 );
+
+return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
 }
 
 export function useAuth() {

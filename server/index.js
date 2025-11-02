@@ -2,26 +2,56 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(express.json());
-app.use(cookieParser());
+app.use(express.json({ limit: "2mb" }));
+app.use(express.urlencoded({ extended: true })); 
+
+const WEB_BASE = process.env.WEB_BASE_URL || "http://localhost:5173";
+const ORIGINS = (process.env.CORS_ORIGINS || WEB_BASE)
+.split(",")
+.map((s) => s.trim());
+
 app.use(
 cors({
-    origin: process.env.WEB_BASE_URL || "http://localhost:5173",
+    origin: (origin, cb) => {
+    if (!origin) return cb(null, true);
+    return cb(null, ORIGINS.includes(origin));
+    },
     credentials: true,
 })
 );
 
-app.get("/", (req, res) => {
+if (process.env.TRUST_PROXY === "1") {
+app.set("trust proxy", 1);
+}
+
+app.use(cookieParser());
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+app.get("/", (_req, res) => {
 res.json({ message: "NexaHome backend API đang hoạt động!" });
 });
+app.get("/api/health", (_req, res) => res.json({ ok: true }));
+
 app.use("/auth", require("./routes/authRoutes"));
 app.use("/users", require("./routes/userRoutes"));
+app.use("/admin/products", require("./routes/productRoutes"));
+app.use("/admin/brands", require("./routes/brandRoutes"));
+app.use("/admin/categories", require("./routes/categoryRoutes"));
 
-app.get("/api/health", (req, res) => res.json({ ok: true }));
+app.use((req, res, _next) => {
+res.status(404).json({ ok: false, message: "Không tìm thấy endpoint" });
+});
+app.use((err, _req, res, _next) => {
+console.error(err);
+const code = err.status || 500;
+res.status(code).json({ ok: false, message: err.message || "Lỗi máy chủ" });
+});
 
 app.listen(PORT, () => {
 console.log(`Server đang chạy tại http://localhost:${PORT}`);

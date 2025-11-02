@@ -1,4 +1,3 @@
-// /pages/auth/auth.jsx
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Dangnhap from "./components/Dangnhap";
@@ -30,60 +29,70 @@ function AuthPage() {
     attempt();
   };
 
-useEffect(() => {
-  if (inited.current) return;
-  inited.current = true;
+  useEffect(() => {
+    if (inited.current) return;
+    inited.current = true;
 
-  const google = window.google;
-  if (!google?.accounts?.id) return;
+    const google = window.google;
+    if (!google?.accounts?.id) return;
 
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-  const API_BASE = (
-    import.meta.env.VITE_API_BASE_URL ||
-    import.meta.env.VITE_API_URL ||
-    "http://localhost:5000"
-  ).replace(/\/$/, "");
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    const API_BASE = (
+      import.meta.env.VITE_API_BASE_URL ||
+      import.meta.env.VITE_API_URL ||
+      "http://localhost:5000"
+    ).replace(/\/$/, "");
 
-  google.accounts.id.initialize({
-    client_id: clientId,
-    callback: async (response) => {
-      try {
-        const r = await fetch(`${API_BASE}/auth/google`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ credential: response.credential }),
-        });
-        const data = await r.json();
-        if (r.status === 202) {
-          toast.info(data.message || "Vui lòng kiểm tra email để xác minh.");
-          navigate("/dang-nhap?tab=login&verifySent=1", { replace: true });
-          return;
+    google.accounts.id.initialize({
+      client_id: clientId,
+      callback: async (response) => {
+        try {
+          const r = await fetch(`${API_BASE}/auth/google`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ credential: response.credential }),
+          });
+          const data = await r.json();
+          if (r.status === 202) {
+            toast.info(data.message || "Vui lòng kiểm tra email để xác minh.");
+            navigate("/dang-nhap?tab=login&verifySent=1", { replace: true });
+            return;
+          }
+          if (!r.ok) throw new Error(data.message || "Google login failed");
+
+          const meRes = await fetch(`${API_BASE}/auth/me`, {
+            method: "GET",
+            credentials: "include",
+          });
+          const meData = await meRes.json().catch(() => ({}));
+          const role = meData?.user?.vai_tro;
+
+          toast.success("Đăng nhập Google thành công!", { autoClose: 1200 });
+          if (["admin", "nhan_vien"].includes(role)) {
+          navigate("/admin", { replace: true });
+          } else {
+            navigate("/tai-khoan", { replace: true });
+          }
+        } catch (e) {
+          console.error("GOOGLE LOGIN ERROR:", e?.message || e);
+          toast.error(`Lỗi Google: ${e?.message || "Không xác định"}`);
         }
-        if (!r.ok) throw new Error(data.message || "Google login failed");
+      },
+      ux_mode: "popup",
+    });
 
-        toast.success("Đăng nhập Google thành công!", { autoClose: 1200, onClose: () => navigate(0) });
-        navigate("/tai-khoan", { replace: true });
-      } catch (e) {
-        console.error("GOOGLE LOGIN ERROR:", e?.message || e);
-        toast.error(`Lỗi Google: ${e?.message || "Không xác định"}`);
+    safeRenderGoogleBtn(tab === "login" ? "googleLoginBtn" : "googleSignupBtn");
+
+    return () => {
+      try {
+        const g = window.google;
+        if (g?.accounts?.id?.cancel) g.accounts.id.cancel();
+      } catch (err) {
+        console.error("[AuthPage] Cleanup Google One Tap error:", err);
       }
-    },
-    ux_mode: "popup",
-  });
-
-  safeRenderGoogleBtn(tab === "login" ? "googleLoginBtn" : "googleSignupBtn");
-
-  return () => {
-    try {
-      const g = window.google;
-      if (g?.accounts?.id?.cancel) g.accounts.id.cancel();
-    } catch (err) {
-      console.error("[AuthPage] Cleanup Google One Tap error:", err);
-    }
-  };
-}, []); 
-
+    };
+  }, []); 
 
   useEffect(() => {
     const google = window.google;
@@ -101,12 +110,24 @@ useEffect(() => {
           </header>
 
           <div className="nh-tabs" role="tablist" aria-label="Chuyển tab đăng nhập/đăng ký">
-            <button role="tab" aria-selected={tab === "login"}
+            <button
+              role="tab"
+              aria-selected={tab === "login"}
               className={`nh-tab ${tab === "login" ? "is-active" : ""}`}
-              onClick={() => setTab("login")} type="button">Đăng nhập</button>
-            <button role="tab" aria-selected={tab === "register"}
+              onClick={() => setTab("login")}
+              type="button"
+            >
+              Đăng nhập
+            </button>
+            <button
+              role="tab"
+              aria-selected={tab === "register"}
               className={`nh-tab ${tab === "register" ? "is-active" : ""}`}
-              onClick={() => setTab("register")} type="button">Đăng ký</button>
+              onClick={() => setTab("register")}
+              type="button"
+            >
+              Đăng ký
+            </button>
           </div>
 
           <div className="nh-card" role="region" aria-live="polite">

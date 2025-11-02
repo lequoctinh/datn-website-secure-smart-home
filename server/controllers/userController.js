@@ -1,10 +1,12 @@
 const bcrypt = require("bcryptjs");
 const pool = require("../config/db");
+
+// helpers 
 function isValidVNPhone(s) {
     return /^0\d{9,10}$/.test(String(s || "").trim());
 }
 function isValidGender(g) {
-    if (g == null || g === "") return true; 
+    if (g == null || g === "") return true;
     const v = String(g).toLowerCase();
     return ["nam", "nu", "khac"].includes(v);
 }
@@ -24,11 +26,11 @@ function isValidDateYYYYMMDD(d) {
 }
 function normalizeDate(d) {
     if (!d) return null;
-    return String(d).trim() || null; 
+    return String(d).trim() || null;
 }
 
-// GET /users/me
-exports.me = async (req, res) => {
+//ME
+async function me(req, res) {
 try {
     if (!req.user) return res.status(401).json({ ok: false, message: "Chưa đăng nhập" });
 
@@ -48,10 +50,10 @@ try {
     console.error(e);
     return res.status(500).json({ ok: false, message: "Lỗi máy chủ" });
 }
-};
+}
 
-// PUT /users/me
-exports.updateMe = async (req, res) => {
+// UPDATE ME 
+async function updateMe(req, res) {
 try {
     if (!req.user) return res.status(401).json({ ok: false, message: "Chưa đăng nhập" });
 
@@ -83,10 +85,10 @@ try {
     console.error(e);
     return res.status(500).json({ ok: false, message: "Lỗi máy chủ" });
 }
-};
+}
 
-// PUT /users/me/password
-exports.changePassword = async (req, res) => {
+// CHANGE PASSWORD
+async function changePassword(req, res) {
 try {
     if (!req.user) return res.status(401).json({ ok: false, message: "Chưa đăng nhập" });
 
@@ -122,4 +124,150 @@ try {
     console.error(e);
     return res.status(500).json({ ok: false, message: "Lỗi máy chủ" });
 }
+}
+function genStrongPassword() {
+    const U="ABCDEFGHJKLMNPQRSTUVWXYZ", L="abcdefghijkmnpqrstuvwxyz",
+            D="23456789", S="@#$%&*+-_";
+    const A=U+L+D+S;
+    const pick = s => s[Math.floor(Math.random()*s.length)];
+    let x = pick(U)+pick(L)+pick(D)+pick(S);
+    for (let i=4;i<12;i++) x += pick(A);
+    return x.split("").sort(()=>Math.random()-0.5).join("");
+}
+
+// POST /admin/users
+async function createStaffUser(req, res) {
+    try {
+        if (!req.user) return res.status(401).json({ ok:false, message:"Chưa đăng nhập" });
+        if (req.user.vai_tro !== "admin") return res.status(403).json({ ok:false, message:"Không đủ quyền" });
+
+        let { ho_ten, email, vai_tro, password, sdt=null, gioi_tinh=null, ngay_sinh=null } = req.body || {};
+        if (!email || !vai_tro) return res.status(400).json({ ok:false, message:"Thiếu email hoặc vai_tro" });
+        if (!["admin","nhan_vien"].includes(String(vai_tro))) {
+        return res.status(400).json({ ok:false, message:"vai_tro chỉ nhận 'admin' hoặc 'nhan_vien'" });
+        }
+
+        const [dup] = await pool.query("SELECT id FROM nguoi_dung WHERE email=? LIMIT 1", [email]);
+        if (dup.length) return res.status(409).json({ ok:false, message:"Email đã tồn tại" });
+
+        const raw = password && String(password).trim().length >= 8 ? String(password).trim() : genStrongPassword();
+        const hash = await bcrypt.hash(raw, 10);
+
+        const [r] = await pool.query(
+        `INSERT INTO nguoi_dung
+        (vai_tro, ho_ten, email, email_da_xac_minh, sdt, gioi_tinh, ngay_sinh,
+            mat_khau_hash, trang_thai, ngay_tao, ngay_cap_nhat)
+        VALUES (?, ?, ?, 1, ?, ?, ?, ?, 'active', NOW(), NOW())`,
+        [vai_tro, ho_ten||null, email, sdt, normalizeGender(gioi_tinh), normalizeDate(ngay_sinh), hash]
+        );
+
+        return res.status(201).json({
+        ok: true,
+        message: "Tạo tài khoản thành công",
+        data: {
+            user: {
+            id: r.insertId, ho_ten: ho_ten||null, email, vai_tro,
+            sdt, gioi_tinh: normalizeGender(gioi_tinh), ngay_sinh: normalizeDate(ngay_sinh), trang_thai: "active"
+            },
+            tempPassword: password ? undefined : raw
+        }
+        });
+    } catch (e) {
+        console.error(e);
+        return res.status(500).json({ ok:false, message:"Lỗi máy chủ" });
+    }
+};
+async function listUsersAdmin(req, res) {
+try {
+    if (!req.user || req.user.vai_tro !== "admin") {
+    return res.status(403).json({ ok: false, message: "Không đủ quyền" });
+    }
+
+    const page = Math.max(1, parseInt(req.query.page || "1", 10));
+    const pageSize = Math.min(50, Math.max(1, parseInt(req.query.pageSize || "10", 10)));
+    const keyword = String(req.query.keyword || "").trim().toLowerCase();
+
+    const params = [];
+    let where = "1=1";
+    if (keyword) {
+    where += " AND (LOWER(email) LIKE ? OR LOWER(ho_ten) LIKE ?)";
+    params.push(`%${keyword}%`, `%${keyword}%`);
+    }
+
+    const offset = (page - 1) * pageSize;
+    const sqlData = `
+    SELECT id, ho_ten, email, vai_tro, trang_thai
+    FROM nguoi_dung
+    WHERE ${where}
+    ORDER BY id DESC
+    LIMIT ? OFFSET ?`;
+    const sqlCount = `SELECT COUNT(*) AS total FROM nguoi_dung WHERE ${where}`;
+
+    const [rows] = await pool.query(sqlData, [...params, pageSize, offset]);
+    const [c] = await pool.query(sqlCount, params);
+    const total = c[0]?.total || 0;
+
+    return res.json({
+    ok: true,
+    data: { items: rows, page, pageSize, total, totalPages: Math.ceil(total / pageSize) }
+    });
+} catch (e) {
+    console.error(e);
+    return res.status(500).json({ ok: false, message: "Lỗi máy chủ" });
+}
+}
+async function adminListUsers(req, res) {
+    try {
+        if (!req.user) return res.status(401).json({ ok:false, message:"Chưa đăng nhập" });
+        if (req.user.vai_tro !== "admin") return res.status(403).json({ ok:false, message:"Không đủ quyền" });
+
+        let { page = 1, pageSize = 10, keyword = "" } = req.query || {};
+        page = Math.max(1, parseInt(page));
+        pageSize = Math.min(50, Math.max(1, parseInt(pageSize)));
+        const offset = (page - 1) * pageSize;
+
+        const kw = String(keyword || "").trim();
+        const whereParts = [];
+        const params = [];
+        if (kw) {
+        whereParts.push("(email LIKE ? OR ho_ten LIKE ?)");
+        params.push(`%${kw}%`, `%${kw}%`);
+        }
+        const whereSql = whereParts.length ? `WHERE ${whereParts.join(" AND ")}` : "";
+
+        const [[{ total }]] = await pool.query(
+        `SELECT COUNT(*) AS total FROM nguoi_dung ${whereSql}`, params
+        );
+
+        const [rows] = await pool.query(
+        `SELECT id, ho_ten, email, vai_tro, trang_thai
+        FROM nguoi_dung
+        ${whereSql}
+        ORDER BY id DESC
+        LIMIT ? OFFSET ?`,
+        [...params, pageSize, offset]
+        );
+
+        return res.json({
+        ok: true,
+        data: {
+            items: rows,
+            page,
+            pageSize,
+            total,
+            totalPages: Math.max(1, Math.ceil(total / pageSize)),
+        },
+        });
+    } catch (e) {
+        console.error(e);
+        return res.status(500).json({ ok:false, message:"Lỗi máy chủ" });
+    }
+}
+module.exports = {
+    me,
+    updateMe,
+    changePassword,
+    createStaffUser,
+    listUsersAdmin,
+    adminListUsers
 };
