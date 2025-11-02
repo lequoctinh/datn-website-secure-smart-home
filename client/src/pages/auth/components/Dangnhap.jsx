@@ -1,12 +1,14 @@
-// /pages/auth/components/Dangnhap.jsx
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { api } from "../../../lib/api";
 import { toast } from "react-toastify";
+import { useAuth } from "../../../context/AuthContext";
 
 function Dangnhap() {
 const navigate = useNavigate();
 const location = useLocation();
+const { refresh } = useAuth(); 
+
 const [form, setForm] = useState({ email: "", password: "" });
 const [errors, setErrors] = useState({});
 const [submitting, setSubmitting] = useState(false);
@@ -15,11 +17,14 @@ const [showPw, setShowPw] = useState(false);
 useEffect(() => {
     const usp = new URLSearchParams(location.search);
     if (usp.get("verified") === "1") {
-    toast.success("Email đã được xác minh, bạn có thể đăng nhập.", { toastId: "verified-ok" });
+    toast.success("Email đã được xác minh, bạn có thể đăng nhập.", {
+        toastId: "verified-ok",
+    });
     }
 }, [location.search]);
 
-const onChange = (e) => setForm((s) => ({ ...s, [e.target.name]: e.target.value }));
+const onChange = (e) =>
+    setForm((s) => ({ ...s, [e.target.name]: e.target.value }));
 
 const validate = () => {
     const e = {};
@@ -33,30 +38,38 @@ const onSubmit = async (e) => {
     const eObj = validate();
     setErrors(eObj);
     if (Object.keys(eObj).length) {
-    toast.error("Vui lòng điền đầy đủ thông tin.");
-    return;
+        toast.error("Vui lòng điền đầy đủ thông tin.");
+        return;
     }
 
     try {
-    setSubmitting(true);
-    await api("/auth/login", {
+        setSubmitting(true);
+
+        await api("/auth/login", {
         method: "POST",
         withCred: true,
         body: { email: form.email, password: form.password },
-    });
-    toast.success("Đăng nhập thành công!", {
-        autoClose: 1200,
-        onClose: () => navigate(0), 
-    });
+        });
 
-    navigate("/", { replace: true });
+        await refresh();
 
+        const me = await api("/auth/me", { method: "GET", withCred: true });
+        const role = me?.user?.vai_tro;
+
+        toast.success("Đăng nhập thành công!", { autoClose: 1200 });
+
+        if (["admin", "nhan_vien"].includes(role)) {
+        navigate("/admin", { replace: true });
+        } else {
+        navigate("/tai-khoan", { replace: true });
+        }
     } catch (err) {
-    toast.error(err.message || "Đăng nhập thất bại");
+        toast.error(err.message || "Đăng nhập thất bại");
     } finally {
-    setSubmitting(false);
+        setSubmitting(false);
     }
 };
+
 
 return (
     <div className="p-6 md:p-8">
@@ -67,7 +80,9 @@ return (
 
     <form onSubmit={onSubmit} noValidate className="space-y-4">
         <div>
-        <label htmlFor="login-email" className="form-label">Email</label>
+        <label htmlFor="login-email" className="form-label">
+            Email
+        </label>
         <input
             id="login-email"
             name="email"
@@ -82,7 +97,9 @@ return (
         </div>
 
         <div>
-        <label htmlFor="login-password" className="form-label">Mật khẩu</label>
+        <label htmlFor="login-password" className="form-label">
+            Mật khẩu
+        </label>
         <div className="input-with-icon">
             <input
             id="login-password"
@@ -106,18 +123,26 @@ return (
             {showPw ? "Ẩn" : "Hiện"}
             </button>
         </div>
-        {errors.password && <p className="form-error mt-1">{errors.password}</p>}
+        {errors.password && (
+            <p className="form-error mt-1">{errors.password}</p>
+        )}
         </div>
 
         <div className="flex items-center justify-between">
         <label className="flex items-center gap-2">
-            <input type="checkbox" className="form-checkbox" /> <span>Ghi nhớ tôi</span>
+            <input type="checkbox" className="form-checkbox" />{" "}
+            <span>Ghi nhớ tôi</span>
         </label>
-        <Link to="/quen-mat-khau" className="nh-link">Quên mật khẩu?</Link>
+        <Link to="/quen-mat-khau" className="nh-link">
+            Quên mật khẩu?
+        </Link>
         </div>
 
         <div className="mt-3">
-        <div id="googleLoginBtn" style={{ display: "flex", justifyContent: "center" }} />
+        <div
+            id="googleLoginBtn"
+            style={{ display: "flex", justifyContent: "center" }}
+        />
         </div>
 
         <button className="btn btn-primary w-full" type="submit" disabled={submitting}>

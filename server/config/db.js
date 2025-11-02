@@ -1,4 +1,3 @@
-// server/config/db.js
 require("dotenv").config();
 const mysql = require("mysql2/promise");   
 
@@ -13,6 +12,5 @@ queueLimit: 0,
 dateStrings: true,
 });
 
-module.exports = pool; // bạn đang require(pool) trực tiếp trong controller
-// hoặc nếu thích:
-// module.exports = { pool };
+module.exports = pool; 
+

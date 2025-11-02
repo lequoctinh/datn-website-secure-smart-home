@@ -63,55 +63,59 @@ try {
 
 //XÁC MINH EMAIL 
 async function verifyEmail(req, res) {
-try {
-    const { token } = req.query;
-    if (!token) return res.status(400).send("Thiếu token");
+    try {
+        const { token } = req.query;
+        if (!token) return res.status(400).send("Thiếu token");
 
-    const [rows] = await pool.query(
-    `SELECT id, email_token_het_han, email_xac_minh_luc, email_da_xac_minh
-    FROM nguoi_dung
-    WHERE email_token=? LIMIT 1`,
-    [token]
-    );
-    if (!rows.length) return res.status(400).send("Token không hợp lệ"); 
+        const [rows] = await pool.query(
+        `SELECT id, email_token_het_han, email_xac_minh_luc, email_da_xac_minh
+        FROM nguoi_dung
+        WHERE email_token=? LIMIT 1`,
+        [token]
+        );
+        if (!rows.length) return res.status(400).send("Token không hợp lệ");
 
-    const user = rows[0];
+        const userRow = rows[0];
 
-    if (user.email_token_het_han && new Date(user.email_token_het_han).getTime() < Date.now()) {
-    return res.status(400).send("Token đã hết hạn");
+        if (userRow.email_token_het_han && new Date(userRow.email_token_het_han).getTime() < Date.now()) {
+        return res.status(400).send("Token đã hết hạn");
+        }
+        if (userRow.email_xac_minh_luc || userRow.email_da_xac_minh) {
+        return res.status(400).send("Token đã được sử dụng");
+        }
+
+        await pool.query(
+        `UPDATE nguoi_dung
+        SET email_da_xac_minh=1,
+            trang_thai='active',
+            email_xac_minh_luc=NOW(),
+            email_token=NULL,
+            email_token_het_han=NULL
+        WHERE email_token=?`,
+        [token]
+        );
+
+        const [[u]] = await pool.query(
+        "SELECT id, vai_tro, email FROM nguoi_dung WHERE id=? LIMIT 1",
+        [userRow.id]
+        );
+
+        const tokenJwt = signToken({ id: u.id, email: u.email, vai_tro: u.vai_tro });
+
+        res.cookie("token", tokenJwt, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: false,                
+        maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+
+        const redirectTo = `${WEB_BASE}/dang-nhap?verified=1`;
+        return res.redirect(302, redirectTo);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).send("Lỗi máy chủ");
     }
-
-    if (user.email_xac_minh_luc || user.email_da_xac_minh) {
-    return res.status(400).send("Token đã được sử dụng");
-    }
-
-    await pool.query(
-    `UPDATE nguoi_dung
-    SET email_da_xac_minh=1,
-        trang_thai='active',
-        email_xac_minh_luc=NOW(),
-        email_token=NULL,
-        email_token_het_han=NULL
-    WHERE email_token=?`,
-    [token]
-    );
-
-    const tokenJwt = signToken({ id: rows[0].id });
-    res.cookie("token", tokenJwt, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: false,
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    const redirectTo = `${WEB_BASE}/dang-nhap?verified=1`;
-    return res.redirect(302, redirectTo);
-} catch (err) {
-    console.error(err);
-    return res.status(500).send("Lỗi máy chủ");
 }
-}
-
 //ĐĂNG NHẬP
 async function login(req, res) {
 try {
@@ -136,7 +140,7 @@ try {
 
     await pool.query("UPDATE nguoi_dung SET lan_dang_nhap_cuoi=NOW() WHERE id=?", [user.id]);
 
-    const token = signToken({ id: user.id, email: user.email });
+    const token = signToken({ id: user.id, email: user.email, vai_tro: user.vai_tro });
     res.cookie("token", token, {
     httpOnly: true,
     sameSite: "lax",
@@ -263,7 +267,7 @@ async function googleLogin(req, res) {
         }
         }
 
-        const tokenJwt = signToken({ id: user.id, email: user.email });
+        const tokenJwt = signToken({ id: user.id, email: user.email, vai_tro: user.vai_tro });
         res.cookie("token", tokenJwt, {
         httpOnly: true,
         sameSite: "lax",
