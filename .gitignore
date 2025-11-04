@@ -8,9 +8,6 @@ server/node_modules/
 client/.env
 server/.env
 
-# App uploads 
-server/uploads/
-server/server/uploads/
 
 # Logs
 logs
