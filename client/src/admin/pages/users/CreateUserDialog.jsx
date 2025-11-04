@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { api } from "../../../lib/api";
 import { toast } from "react-toastify";
 
-export default function CreateUserDialog({ open, onClose, onCreated }) {
+function CreateUserDialog({ open, onClose, onCreated }) {
 const [form, setForm] = useState({
     ho_ten: "",
     email: "",
@@ -31,8 +31,8 @@ const onSubmit = async (e) => {
         body: {
         ho_ten: form.ho_ten || null,
         email: form.email,
-        vai_tro: form.vai_tro,         // "admin" | "nhan_vien"
-        password: form.password || undefined, // nếu bỏ trống sẽ nhận tempPassword
+        vai_tro: form.vai_tro,        
+        password: form.password || undefined, 
         },
     });
 
@@ -42,7 +42,7 @@ const onSubmit = async (e) => {
         toast.info(`Mật khẩu tạm thời: ${temp}`, { autoClose: 6000 });
     }
 
-    onCreated?.();   // refresh list
+    onCreated?.(); 
     onClose?.();
     } catch (e) {
     toast.error(e.message || "Không tạo được tài khoản");
@@ -132,3 +132,4 @@ return (
     </div>
 );
 }
+export default CreateUserDialog;

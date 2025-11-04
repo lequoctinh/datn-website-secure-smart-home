@@ -1,11 +1,10 @@
-// server/controllers/productController.js
 const path = require("path");
 const fs = require("fs");
 const multer = require("multer");
 const pool = require("../config/db");
 
 const API_BASE = process.env.API_BASE_URL || "http://localhost:5000";
-const UPLOAD_ROOT = path.join(__dirname, "..", "uploads"); // ✅ đúng thư mục static
+const UPLOAD_ROOT = path.join(__dirname, "..", "uploads"); 
 const uploadDir = path.join(UPLOAD_ROOT, "products");
 
 fs.mkdirSync(uploadDir, { recursive: true });

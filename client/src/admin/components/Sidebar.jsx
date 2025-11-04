@@ -27,7 +27,13 @@ return (
     </svg>
 );
 }
-
+function IconBrands() {
+    return (
+        <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M3 7h18M3 12h18M3 17h18" />
+        </svg>
+    );
+}
 function IconUsers() {
 return (
     <svg viewBox="0 0 24 24" className="w-5 h-5"
@@ -80,7 +86,10 @@ return (
         <IconDashboard />
         {open && <span>Tổng quan</span>}
         </NavLink>
-
+        <NavLink to="/admin/brands" className={itemCls}>
+            <IconBrands />
+            {open && <span>Thương hiệu</span>}
+        </NavLink>
         <NavLink to="/admin/users" className={itemCls}>
         <IconUsers />
         {open && <span>Người dùng</span>}

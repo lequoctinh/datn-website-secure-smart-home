@@ -1,7 +1,6 @@
 const bcrypt = require("bcryptjs");
 const pool = require("../config/db");
 
-// helpers 
 function isValidVNPhone(s) {
     return /^0\d{9,10}$/.test(String(s || "").trim());
 }

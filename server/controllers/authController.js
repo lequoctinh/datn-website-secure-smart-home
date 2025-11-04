@@ -149,9 +149,7 @@ try {
     });
 
     res.json({
-    ok: true,
-    message: "Đăng nhập thành công",
-    data: { token, user: { id: user.id, email: user.email, ho_ten: user.ho_ten } },
+        ok: true, message: "Đăng nhập thành công", data: { token, user: { id: user.id, email: user.email, ho_ten: user.ho_ten, vai_tro: user.vai_tro } }, 
     });
 } catch (err) {
     console.error(err);
@@ -275,7 +273,15 @@ async function googleLogin(req, res) {
         maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
-        return res.json({ ok: true, message: "Đăng nhập Google thành công", data: { token: tokenJwt, user } });
+        if (!user.vai_tro) user.vai_tro = 'customer'; 
+        return res.json({ 
+        ok: true, 
+        message: "Đăng nhập Google thành công", 
+        data: { 
+        token: tokenJwt, 
+        user: { id: user.id, email: user.email, ho_ten: user.ho_ten, vai_tro: user.vai_tro } 
+        } 
+        });
     } catch (err) {
         console.error(err);
         return res.status(401).json({ ok: false, message: "Xác thực Google thất bại" });

@@ -61,12 +61,9 @@ function AuthPage() {
           }
           if (!r.ok) throw new Error(data.message || "Google login failed");
 
-          const meRes = await fetch(`${API_BASE}/auth/me`, {
-            method: "GET",
-            credentials: "include",
-          });
+          const meRes = await fetch(`${API_BASE}/auth/me`, { method: "GET", credentials: "include" });
           const meData = await meRes.json().catch(() => ({}));
-          const role = meData?.user?.vai_tro;
+          const role = meData?.data?.user?.vai_tro;
 
           toast.success("Đăng nhập Google thành công!", { autoClose: 1200 });
           if (["admin", "nhan_vien"].includes(role)) {

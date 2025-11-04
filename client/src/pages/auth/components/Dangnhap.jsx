@@ -50,11 +50,9 @@ const onSubmit = async (e) => {
         withCred: true,
         body: { email: form.email, password: form.password },
         });
-
         await refresh();
-
         const me = await api("/auth/me", { method: "GET", withCred: true });
-        const role = me?.user?.vai_tro;
+        const role = me?.data?.user?.vai_tro;
 
         toast.success("Đăng nhập thành công!", { autoClose: 1200 });
 

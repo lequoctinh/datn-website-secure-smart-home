@@ -1,9 +1,7 @@
-// src/admin/pages/products/ProductsList.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../../../lib/api";
 
-// Lấy base để ghép ảnh nếu server trả về đường dẫn tương đối (/uploads/..)
 const ASSET_BASE = (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 const joinAsset = (p) => {
 if (!p) return "";
@@ -30,7 +28,6 @@ useEffect(() => {
         withCred: true,
         query: { page, pageSize, q },
         });
-        // Hỗ trợ cả 2 dạng trả về: {ok, items, total} và {data:{items,total}}
         const items = res?.data?.items ?? res?.items ?? [];
         const totalNum = res?.data?.total ?? res?.total ?? 0;
         setRows(items);
