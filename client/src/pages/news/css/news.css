@@ -5,7 +5,6 @@
 }
 .new-contai{
   background-color: #ffffff;
- 
   max-width: 1200px;
   margin: 30px auto 0;
   border-radius: 12px;
@@ -209,7 +208,7 @@
 
 /* Điều chỉnh khoảng cách tổng thể */
 .new-contai {
-  padding-top: 2rem;
+  /* padding-top: 2rem; */
   padding-bottom: 4rem;
 }
 
