@@ -29,7 +29,6 @@ const [cats, setCats] = useState([]);
 const [file, setFile] = useState(null);
 const [saving, setSaving] = useState(false);
 
-// load dropdowns
 useEffect(() => {
     (async () => {
     const [th, dm] = await Promise.all([
@@ -42,7 +41,6 @@ useEffect(() => {
     })();
 }, []);
 
-// load product when edit
 useEffect(() => {
     if (!isEdit) return;
     (async () => {
@@ -87,7 +85,6 @@ async function onSubmit(e) {
     return;
     }
 
-    // validate JSON "thong_so"
     let thongSoJson = null;
     try {
     thongSoJson = form.thong_so ? JSON.parse(form.thong_so) : null;
