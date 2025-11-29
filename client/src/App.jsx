@@ -12,6 +12,8 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import CartPage from "./pages/cart/CartPage";
 import OrderHistoryPage from "./pages/cart/OrderHistoryPage";
+import Checkout from "./pages/cart/Checkout";
+
 
 const AdminLayout = lazy(() => import("./admin/adminlayout/AdminLayout"));
 const RequireAdmin = lazy(() => import("./admin/components/RequireAdmin"));
@@ -73,6 +75,7 @@ function App() {
             <Route path="/tai-khoan" element={<Taikhoan />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/order-history" element={<OrderHistoryPage />} />
+            <Route path="/checkout" element={<Checkout />} />
           </Routes>
         </Layout>
       )}

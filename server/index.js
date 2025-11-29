@@ -43,6 +43,8 @@ app.use("/users", require("./routes/userRoutes"));
 app.use("/admin/products", require("./routes/productRoutes"));
 app.use("/admin/brands", require("./routes/brandRoutes"));
 app.use("/admin/categories", require("./routes/categoryRoutes"));
+app.use("/api/customers", require("./routes/customerRoutes")); // nếu có
+app.use("/api/orders", require("./routes/orderRoutes"));
 
 app.use((req, res, _next) => {
 res.status(404).json({ ok: false, message: "Không tìm thấy endpoint" });
