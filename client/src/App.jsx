@@ -13,6 +13,8 @@ import "react-toastify/dist/ReactToastify.css";
 import CartPage from "./pages/cart/CartPage";
 import OrderHistoryPage from "./pages/cart/OrderHistoryPage";
 import Checkout from "./pages/cart/Checkout";
+import OrderDetailPage from "./pages/cart/OrderDetailPage";
+import OrderSuccess from "./pages/cart/OrderSuccess";
 
 
 const AdminLayout = lazy(() => import("./admin/adminlayout/AdminLayout"));
@@ -48,6 +50,9 @@ function App() {
             <Route path="brands" element={<AdminBrands />} />
             <Route path="brands/new" element={<AdminBrandForm />} />
             <Route path="brands/:id" element={<AdminBrandForm />} />
+            
+
+                        
           </Route>
         </Routes>
       </Suspense>
@@ -76,6 +81,9 @@ function App() {
             <Route path="/cart" element={<CartPage />} />
             <Route path="/order-history" element={<OrderHistoryPage />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/order/:id" element={<OrderDetailPage />} />
+            <Route path="/order-success" element={<OrderSuccess />} />
+
           </Routes>
         </Layout>
       )}

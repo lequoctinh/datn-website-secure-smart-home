@@ -1,4 +1,4 @@
-# Node.js
+@All trong folder dự án tạo .gitignore với nội dung như sau:# Node.js
 node_modules/
 client/node_modules/
 server/node_modules/

@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
 
 export default function Checkout() {
   const [shipping, setShipping] = useState("standard");
   const [payment, setPayment] = useState("cod");
+  const navigate = useNavigate();
+
 
   // Thông tin giao hàng
   const [form, setForm] = useState({
@@ -54,7 +58,7 @@ export default function Checkout() {
         product_id: item.id || item.product_id || null,
         product_name: item.name,
         product_image: item.image,
-        unit_price: Number(item.price),
+        unit_price: Number(item.price || item.unit_price),
         quantity: Number(item.quantity),
       })),
       address: form,
@@ -82,8 +86,8 @@ export default function Checkout() {
 
       alert("Đặt hàng thành công! Mã đơn: " + data.order.order_code);
 
-      // Điều hướng sang trang chi tiết đơn
-      window.location.href = `/order/${data.order.id}`;
+      // Điều hướng sang trang đặt hàng thành công
+      navigate("/order-success");
     } catch (err) {
       console.error(err);
       alert("Lỗi kết nối server");
