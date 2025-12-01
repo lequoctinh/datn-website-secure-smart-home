@@ -153,14 +153,42 @@ exports.getOrdersByUser = async (req, res) => {
 // GET /api/orders/:id (chi tiết 1 order)
 exports.getOrderById = async (req, res) => {
   const orderId = req.params.id;
+
   try {
-    const [[order]] = await pool.query(`SELECT * FROM orders WHERE id = ?`, [orderId]);
-    if (!order) return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
+    const [[order]] = await pool.query(
+      `SELECT * FROM orders WHERE id = ?`,
+      [orderId]
+    );
 
-    const [items] = await pool.query(`SELECT * FROM order_items WHERE order_id = ?`, [orderId]);
-    const [[addr]] = await pool.query(`SELECT * FROM shipping_address WHERE order_id = ?`, [orderId]);
+    if (!order) {
+      return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
+    }
 
-    res.json({ order, items, address: addr || null });
+    const [items] = await pool.query(
+      `SELECT * FROM order_items WHERE order_id = ?`,
+      [orderId]
+    );
+
+    const [[addr]] = await pool.query(
+      `SELECT * FROM shipping_address WHERE order_id = ?`,
+      [orderId]
+    );
+
+    // TÍNH SUBTOTAL (tổng tiền hàng, chưa gồm phí ship/giảm giá)
+    let subtotal = 0;
+    items.forEach((it) => {
+      subtotal += Number(it.total_price || 0);
+    });
+
+    // TRẢ VỀ ĐÚNG ĐỊNH DẠNG FRONTEND CẦN
+    res.json({
+      order: {
+        ...order,
+        subtotal,          // ⭐ thêm subtotal
+      },
+      items,
+      address: addr || null,
+    });
   } catch (err) {
     console.error("getOrderById:", err);
     res.status(500).json({ message: "Lỗi server" });
