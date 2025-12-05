@@ -119,7 +119,7 @@ return (
             <nav className="tabletMenu px-2 pb-2">
                 <ul className="tabletMenu-list space-y-2">
                 <li><Link to="/ve-chung-toi" onClick={closeAllTablet}>Về chúng tôi</Link></li>
-
+                <li><Link to="/tin-tuc" onClick={closeAllTablet}>Tin Tức</Link></li>
                 <li className="tablet-dd">
                     <button type="button" className="tablet-dd-toggle" onClick={() => setOpenDrop1(v => !v)} aria-expanded={openDrop1}>Khóa cửa thông minh 
                         <span className={`chev ${openDrop1 ? "rot" : ""}`}>&#9662;</span>
@@ -269,7 +269,7 @@ return (
 
 const renderMenu = () => (
 <>
-    <li><Link to="/ve-chung-toi">Về chúng tôi</Link></li>
+   
     <li className="relative group">
         <Link to="/khoa-cua-thong-minh">Khóa cửa thông minh <FontAwesomeIcon icon={faAngleDown} /></Link>
         <ul className="list-menu_secure absolute hidden group-hover:block">
@@ -308,6 +308,8 @@ const renderMenu = () => (
             <li><Link to="/phu-kien-camera">Phụ kiện camera</Link></li>
         </ul>
     </li>
+     <li><Link to="/ve-chung-toi">Về chúng tôi</Link></li>
+     <li><Link to="/tin-tuc">Tin tức</Link></li>
     <li><Link to="/lien-he">Liên hệ</Link></li>
 </>
 );

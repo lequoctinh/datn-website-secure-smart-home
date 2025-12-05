@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const path = require("path");
+const { request } = require("http");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -25,6 +26,7 @@ cors({
 })
 );
 
+
 if (process.env.TRUST_PROXY === "1") {
 app.set("trust proxy", 1);
 }
@@ -39,6 +41,9 @@ res.json({ message: "NexaHome backend API đang hoạt động!" });
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
 
 app.use("/auth", require("./routes/authRoutes"));
+app.use("/api/products", require("./routes/productUserRoutes"));
+app.use("/api/stats", require("./routes/productUserRoutes"));
+app.use("/news", require("./routes/newsRoutes"));
 app.use("/users", require("./routes/userRoutes"));
 app.use("/admin/products", require("./routes/productRoutes"));
 app.use("/admin/brands", require("./routes/brandRoutes"));

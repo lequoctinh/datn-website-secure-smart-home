@@ -79,6 +79,84 @@ const [dup] = await conn.query(sql, args);
 if (dup.length) throw new Error("Slug đã tồn tại, vui lòng chọn slug khác");
 }
 
+async function getRelatedProducts(req, res) {
+  const slug = req.params.slug;
+
+  try {
+    // Lấy sản phẩm hiện tại
+    const [prod] = await pool.query(
+      `SELECT id, danh_muc_id FROM san_pham WHERE duong_dan_ten_seo = ? LIMIT 1`,
+      [slug]
+    );
+
+    if (!prod.length) {
+      return res.json({ ok: false, data: [] });
+    }
+
+    const productId = prod[0].id;
+    const categoryId = prod[0].danh_muc_id;
+
+    // Lấy 6 SP liên quan cùng danh mục
+    const [related] = await pool.query(
+      `SELECT id, ten_san_pham, duong_dan_ten_seo, anh_dai_dien, gia_goc, gia_khuyen_mai
+       FROM san_pham
+       WHERE danh_muc_id = ? AND id != ?
+       ORDER BY id DESC
+       LIMIT 6`,
+      [categoryId, productId]
+    );
+
+    return res.json({ ok: true, data: related });
+
+  } catch (err) {
+    console.error("ERR related:", err);
+    return res.status(500).json({ ok: false });
+  }
+}
+
+
+
+async function getProductBySlug(req, res) {
+  const param = req.params.id_or_slug;
+
+  try {
+    let query, values;
+
+    // Nếu là số → tìm theo ID
+    if (/^\d+$/.test(param)) {
+      query = `SELECT * FROM san_pham WHERE id = ? LIMIT 1`;
+      values = [param];
+    } 
+    // Nếu là slug → tìm theo duong_dan_ten_seo
+    else {
+      query = `SELECT * FROM san_pham WHERE duong_dan_ten_seo = ? LIMIT 1`;
+      values = [param];
+    }
+
+    const [rows] = await pool.query(query, values);
+
+    if (!rows.length) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    let product = rows[0];
+
+    // Parse JSON thong_so
+    if (product.thong_so && typeof product.thong_so === "string") {
+      try {
+        product.thong_so = JSON.parse(product.thong_so);
+      } catch {}
+    }
+
+    return res.json({ product });
+
+  } catch (err) {
+    console.error("DB ERROR:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
+}
+
+
 
 // GET /admin/products?page=&pageSize=&q=
 async function listProducts(req, res) {
@@ -315,6 +393,38 @@ if (!r.affectedRows)
 res.json({ ok: true });
 }
 
+async function getTopSellingProducts(req, res) {
+  try {
+    const conn = await pool.getConnection();
+
+    const [rows] = await conn.query(`
+      SELECT 
+          sp.id AS product_id,
+          sp.ten_san_pham,
+          sp.duong_dan_ten_seo,
+          sp.anh_dai_dien,
+          bt.id AS variant_id,
+          bt.gia,
+          bt.gia_khuyen_mai,
+          SUM(dhct.so_luong) AS total_sold
+      FROM don_hang_chi_tiet dhct
+      JOIN bien_the bt ON dhct.bien_the_id = bt.id
+      JOIN san_pham sp ON bt.san_pham_id = sp.id
+      GROUP BY sp.id
+      ORDER BY total_sold DESC
+      LIMIT 4
+    `);
+
+    conn.release();
+    res.json({ ok: true, data: rows });
+
+  } catch (error) {
+    console.error("Lỗi API top-selling:", error);
+    res.status(500).json({ ok: false, message: "Lỗi server" });
+  }
+}
+
+
 module.exports = {
 listProducts,
 getProduct,
@@ -322,4 +432,7 @@ createProduct,
 updateProduct,
 removeProduct,
 uploadProductImage,
+getTopSellingProducts,
+getProductBySlug,
+getRelatedProducts
 };

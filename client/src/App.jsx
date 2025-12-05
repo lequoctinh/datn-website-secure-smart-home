@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import Layout from "./layouts";
 import Home from "./pages/home/Home";
+import News from "./pages/news/News";
 import About from "./pages/about/About";
 import ProductSmartLock from "./pages/products/ProductSmartLock";
 import BrandAll from "./pages/products/BrandAll";
@@ -15,6 +16,8 @@ import OrderHistoryPage from "./pages/cart/OrderHistoryPage";
 import Checkout from "./pages/cart/Checkout";
 import OrderDetailPage from "./pages/cart/OrderDetailPage";
 import OrderSuccess from "./pages/cart/OrderSuccess";
+import NewsDetail from "./pages/news/controller/NewsDetail";
+import ProductDetail from "./pages/products/ProductDetail";
 
 
 const AdminLayout = lazy(() => import("./admin/adminlayout/AdminLayout"));
@@ -35,7 +38,7 @@ function App() {
       <Suspense fallback={<div className="p-6">Đang tải admin…</div>}>
         <Routes>
           <Route
-            path="/admin"
+            path="/admin/"
             element={
               <RequireAdmin>
                 <AdminLayout />
@@ -70,6 +73,10 @@ function App() {
           />
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/san-pham/:slug" element={<ProductDetail />} />
+            
+            <Route path="/tin-tuc" element={<News />} />
+            <Route path="/tin-tuc/:slug" element={<NewsDetail />} />
             <Route path="/ve-chung-toi" element={<About />} />
             <Route path="/khoa-cua-thong-minh" element={<ProductSmartLock />} />
             <Route path="/thuong-hieu/:slug" element={<BrandAll />} />
@@ -92,3 +99,4 @@ function App() {
 }
 
 export default App;
+ 
