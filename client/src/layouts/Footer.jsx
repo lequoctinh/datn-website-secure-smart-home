@@ -19,12 +19,12 @@ return (
         <div className="overall-content grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-6 py-10">
             <div className="overall-content_company space-y-3">
                 <h2 className="content-company_title-company text-lg font-semibold">
-                    SECURE SMART HOME – AN TOÀN & ĐẲNG CẤP CHUẨN HÀN
+                    NEXA HOME – AN TOÀN & ĐẲNG CẤP CHUẨN HÀN
                 </h2>
                 <div className="content-company space-y-2 text-sm">
                     <div className="content-company_itemEmail flex items-center gap-2">
                         <FontAwesomeIcon icon={faEnvelope} />
-                        <span>securesmarthome@gmail.com</span>
+                        <span>nexahome@gmail.com</span>
                     </div>
                     <div className="content-company_itemPhone flex items-center gap-2">
                         <FontAwesomeIcon icon={faPhone} />
@@ -66,7 +66,7 @@ return (
 
             <div className="over-Footer_social-links flex flex-col items-center gap-4">
                 <div className="logo-Footer">
-                    <img src="/SecureHome.png" alt="Logo footer" className="h-14" />
+                    <img src="/nexahome.png" alt="Logo footer" className="h-14" />
                 </div>
                 <div className="social-links_item flex gap-4 text-xl">
                     <div className="item-Facebook text-[#3b5998]">

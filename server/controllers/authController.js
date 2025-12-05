@@ -1,165 +1,298 @@
-const bcrypt = require("bcryptjs");
+const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const pool = require("../config/db");
+const { sendVerifyEmail } = require("../utils/mailer");
+const { OAuth2Client } = require("google-auth-library");
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const JWT_SECRET = process.env.JWT_SECRET || "dev_secret";
+const JWT_EXPIRES = "7d";
 
-/**
- * POST /api/auth/register
- * Body: { name, email, password }
- * - Tạo record trong `nguoidung` (email, matkhau_hash)
- * - Tạo record trong `hoso_nguoidung` (nguoidung_id, ho_ten)
- */
-exports.register = async (req, res) => {
-const { name, email, password } = req.body || {};
+const API_BASE = process.env.API_BASE_URL || "http://localhost:5000";
+const WEB_BASE = process.env.WEB_BASE_URL || "http://localhost:5173";
+const REQUIRE_G_VERIFY = String(process.env.REQUIRE_EMAIL_VERIFY_FOR_GOOGLE || "false") === "true";
+function signToken(payload) {
+return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES });
+}
+async function createUniqueEmailToken() {
+for (let i = 0; i < 5; i++) {
+    const t = crypto.randomBytes(32).toString("hex");
+    const [r] = await pool.query("SELECT id FROM nguoi_dung WHERE email_token=? LIMIT 1", [t]);
+    if (!r.length) return t;
+}
+throw new Error("Không thể tạo token email duy nhất");
+}
 
+//  ĐĂNG KÝ
+async function register(req, res) {
 try {
-    // Validate cơ bản
-    if (!email || !password) {
-    return res.status(400).json({ error: "Thiếu email hoặc mật khẩu" });
-    }
-    if (password.length < 8) {
-    return res.status(400).json({ error: "Mật khẩu tối thiểu 8 ký tự" });
-    }
+    const { fullName, email, password } = req.body;
+    if (!fullName || !email || !password)
+    return res.status(400).json({ ok: false, message: "Thiếu dữ liệu" });
+    if (password.length < 6)
+    return res.status(400).json({ ok: false, message: "Mật khẩu tối thiểu 6 ký tự" });
 
-    // Email đã tồn tại?
-    const [dup] = await pool.query(
-    "SELECT id FROM nguoidung WHERE email = ? LIMIT 1",
-    [email]
-    );
-    if (dup.length > 0) {
-    return res.status(400).json({ error: "Email đã tồn tại" });
-    }
+    const [dup] = await pool.query("SELECT id FROM nguoi_dung WHERE email=? LIMIT 1", [email]);
+    if (dup.length) return res.status(409).json({ ok: false, message: "Email đã tồn tại" });
 
     const hash = await bcrypt.hash(password, 10);
+    const token = await createUniqueEmailToken();
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-    // Transaction: tạo nguoidung -> tạo hoso_nguoidung
-    const conn = await pool.getConnection();
-    try {
-    await conn.beginTransaction();
-
-    // 1) bảng `nguoidung`
-    const [r1] = await conn.query(
-        "INSERT INTO nguoidung (email, matkhau_hash) VALUES (?, ?)",
-        [email, hash]
-    );
-    const userId = r1.insertId;
-
-    // 2) bảng `hoso_nguoidung`
-    await conn.query(
-        "INSERT INTO hoso_nguoidung (nguoidung_id, ho_ten) VALUES (?, ?)",
-        [userId, name || null]
+    await pool.query(
+    `INSERT INTO nguoi_dung
+    (vai_tro, ho_ten, email, mat_khau_hash, trang_thai, email_da_xac_minh,
+        email_token, email_token_het_han, email_xac_minh_luc)
+    VALUES ('customer', ?, ?, ?, 'pending', 0, ?, ?, NULL)`,
+    [fullName, email, hash, token, expires]
     );
 
-    await conn.commit();
-    conn.release();
+    const verifyUrl = `${API_BASE}/auth/verify-email?token=${token}`;
+    await sendVerifyEmail(email, verifyUrl);
 
     return res.status(201).json({
-        message: "Đăng ký thành công",
-        userId,
+    ok: true,
+    message: "Đăng ký thành công. Vui lòng kiểm tra email để xác minh tài khoản.",
     });
-    } catch (txErr) {
-    await conn.rollback();
-    conn.release();
-    console.error("REGISTER TX ERR:", txErr);
-    return res.status(500).json({ error: "Lỗi server" });
-    }
 } catch (err) {
-    console.error("REGISTER ERR:", err);
-    return res.status(500).json({ error: "Lỗi server" });
+    console.error(err);
+    return res.status(500).json({ ok: false, message: "Lỗi máy chủ" });
 }
-};
+}
 
-/**
- * POST /api/auth/login
- * Body: { email, password }
- * - Kiểm tra `nguoidung` (email, matkhau_hash, vaitro, trang_thai)
- * - Trả JWT + thông tin cơ bản (có `ho_ten` từ `hoso_nguoidung`)
- */
-exports.login = async (req, res) => {
-const { email, password } = req.body || {};
+//XÁC MINH EMAIL 
+async function verifyEmail(req, res) {
+    try {
+        const { token } = req.query;
+        if (!token) return res.status(400).send("Thiếu token");
 
+        const [rows] = await pool.query(
+        `SELECT id, email_token_het_han, email_xac_minh_luc, email_da_xac_minh
+        FROM nguoi_dung
+        WHERE email_token=? LIMIT 1`,
+        [token]
+        );
+        if (!rows.length) return res.status(400).send("Token không hợp lệ");
+
+        const userRow = rows[0];
+
+        if (userRow.email_token_het_han && new Date(userRow.email_token_het_han).getTime() < Date.now()) {
+        return res.status(400).send("Token đã hết hạn");
+        }
+        if (userRow.email_xac_minh_luc || userRow.email_da_xac_minh) {
+        return res.status(400).send("Token đã được sử dụng");
+        }
+
+        await pool.query(
+        `UPDATE nguoi_dung
+        SET email_da_xac_minh=1,
+            trang_thai='active',
+            email_xac_minh_luc=NOW(),
+            email_token=NULL,
+            email_token_het_han=NULL
+        WHERE email_token=?`,
+        [token]
+        );
+
+        const [[u]] = await pool.query(
+        "SELECT id, vai_tro, email FROM nguoi_dung WHERE id=? LIMIT 1",
+        [userRow.id]
+        );
+
+        const tokenJwt = signToken({ id: u.id, email: u.email, vai_tro: u.vai_tro });
+
+        res.cookie("token", tokenJwt, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: false,                
+        maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+
+        const redirectTo = `${WEB_BASE}/dang-nhap?verified=1`;
+        return res.redirect(302, redirectTo);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).send("Lỗi máy chủ");
+    }
+}
+//ĐĂNG NHẬP
+async function login(req, res) {
 try {
-    if (!email || !password) {
-    return res.status(400).json({ error: "Thiếu email hoặc mật khẩu" });
-    }
-
-    const [rows] = await pool.query(
-    "SELECT id, email, vaitro, trang_thai, matkhau_hash FROM nguoidung WHERE email = ? LIMIT 1",
-    [email]
-    );
-    if (rows.length === 0) {
-    return res.status(400).json({ error: "Sai email hoặc mật khẩu" });
-    }
+    const { email, password } = req.body;
+    const [rows] = await pool.query("SELECT * FROM nguoi_dung WHERE email=? LIMIT 1", [email]);
+    if (!rows.length)
+    return res.status(400).json({ ok: false, message: "Sai email hoặc mật khẩu" });
 
     const user = rows[0];
 
-    if (user.trang_thai === 0) {
-    return res.status(403).json({ error: "Tài khoản đã bị khoá" });
+    if (!user.email_da_xac_minh || user.trang_thai !== "active") {
+    return res.status(403).json({ ok: false, message: "Tài khoản chưa xác minh email" });
+    }
+    if (!user.mat_khau_hash) {
+    return res
+        .status(400)
+        .json({ ok: false, message: "Tài khoản này không có mật khẩu (Google-only)" });
     }
 
-    const ok = await bcrypt.compare(password, user.matkhau_hash);
-    if (!ok) {
-    return res.status(400).json({ error: "Sai email hoặc mật khẩu" });
-    }
+    const ok = await bcrypt.compare(password, user.mat_khau_hash);
+    if (!ok) return res.status(400).json({ ok: false, message: "Sai email hoặc mật khẩu" });
 
-    // Lấy họ tên từ `hoso_nguoidung`
-    const [profileRows] = await pool.query(
-    "SELECT ho_ten FROM hoso_nguoidung WHERE nguoidung_id = ? LIMIT 1",
-    [user.id]
-    );
-    const ho_ten = profileRows.length ? profileRows[0].ho_ten : null;
+    await pool.query("UPDATE nguoi_dung SET lan_dang_nhap_cuoi=NOW() WHERE id=?", [user.id]);
 
-    // Tạo JWT
-    const token = jwt.sign(
-    { id: user.id, role: user.vaitro },
-    JWT_SECRET,
-    { expiresIn: "7d" }
-    );
+    const token = signToken({ id: user.id, email: user.email, vai_tro: user.vai_tro });
+    res.cookie("token", token, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: false,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
-    return res.json({
-    message: "Đăng nhập thành công",
-    token,
-    user: {
-        id: user.id,
-        email: user.email,
-        role: user.vaitro,
-        ho_ten,
-    },
+    res.json({
+        ok: true, message: "Đăng nhập thành công", data: { token, user: { id: user.id, email: user.email, ho_ten: user.ho_ten, vai_tro: user.vai_tro } }, 
     });
 } catch (err) {
-    console.error("LOGIN ERR:", err);
-    return res.status(500).json({ error: "Lỗi server" });
+    console.error(err);
+    res.status(500).json({ ok: false, message: err.message });
 }
-};
+}
 
-/**
- * GET /api/auth/me
- * - Cần middleware auth để set req.user { id, role } từ JWT
- * - Trả thông tin account + profile (đúng tên cột)
- */
-exports.me = async (req, res) => {
-try {
-    const userId = req.user?.id;
-    if (!userId) return res.status(401).json({ error: "Chưa đăng nhập" });
-        const [accRows] = await pool.query(
-        "SELECT id, email, vaitro, trang_thai, ngay_tao, ngay_capnhat FROM nguoidung WHERE id = ? LIMIT 1",
-        [userId]
-    );
-    if (accRows.length === 0) {
-    return res.status(404).json({ error: "Không tìm thấy user" });
+//  ME 
+async function me(req, res) {
+if (!req.user) return res.status(401).json({ ok: false, message: "Chưa đăng nhập" });
+const [rows] = await pool.query(
+    `SELECT id, ho_ten, email, vai_tro, trang_thai, email_da_xac_minh, google_avatar_url
+    FROM nguoi_dung WHERE id=? LIMIT 1`,
+    [req.user.id]
+);
+if (!rows.length) return res.status(404).json({ ok: false, message: "Không tìm thấy người dùng" });
+return res.json({ ok: true, data: { user: rows[0] } });
+}
+
+// LOGOUT
+async function logout(_req, res) {
+res.clearCookie("token");
+return res.json({ ok: true, message: "Đã đăng xuất" });
+}
+
+// GOOGLE LOGIN 
+async function googleLogin(req, res) {
+    try {
+        const { credential } = req.body;
+        const ticket = await client.verifyIdToken({
+        idToken: credential,
+        audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        const payload = ticket.getPayload();
+
+        const email = payload.email;
+        const sub = payload.sub;
+        const name = payload.name || "";
+        const picture = payload.picture || "";
+
+        let [rows] = await pool.query("SELECT * FROM nguoi_dung WHERE google_sub=? LIMIT 1", [sub]);
+        let user = rows[0];
+
+        if (!user) {
+        [rows] = await pool.query("SELECT * FROM nguoi_dung WHERE email=? LIMIT 1", [email]);
+        user = rows[0];
+        if (user) {
+            await pool.query(
+            `UPDATE nguoi_dung
+            SET google_sub=?, google_avatar_url=?
+            WHERE id=?`,
+            [sub, picture, user.id]
+            );
+        }
+        }
+
+        if (!user) {
+        if (REQUIRE_G_VERIFY) {
+            const token = await createUniqueEmailToken();
+            const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+            const [r] = await pool.query(
+            `INSERT INTO nguoi_dung
+            (vai_tro, ho_ten, email, mat_khau_hash, trang_thai, email_da_xac_minh,
+                google_sub, google_avatar_url, email_token, email_token_het_han, email_xac_minh_luc)
+            VALUES ('customer', ?, ?, NULL, 'pending', 0, ?, ?, ?, ?, NULL)`,
+            [name, email, sub, picture, token, expires]
+            );
+            const verifyUrl = `${API_BASE}/auth/verify-email?token=${token}`;
+            await sendVerifyEmail(email, verifyUrl);
+            return res.status(202).json({
+            ok: true,
+            message: "Đăng ký bằng Google thành công. Vui lòng kiểm tra email để xác minh trước khi đăng nhập.",
+            });
+        } else {
+            const [r] = await pool.query(
+            `INSERT INTO nguoi_dung
+            (vai_tro, ho_ten, email, mat_khau_hash, trang_thai, email_da_xac_minh,
+                google_sub, google_avatar_url, email_xac_minh_luc)
+            VALUES ('customer', ?, ?, NULL, 'active', 1, ?, ?, NOW())`,
+            [name, email, sub, picture]
+            );
+            user = { id: r.insertId, email, ho_ten: name };
+        }
+        }
+
+        if (REQUIRE_G_VERIFY) {
+        if (!user.email_da_xac_minh || user.trang_thai !== "active") {
+            const token = await createUniqueEmailToken();
+            const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+            await pool.query(
+            `UPDATE nguoi_dung
+            SET email_token=?, email_token_het_han=?, trang_thai='pending'
+            WHERE id=?`,
+            [token, expires, user.id]
+            );
+            const verifyUrl = `${API_BASE}/auth/verify-email?token=${token}`;
+            await sendVerifyEmail(email, verifyUrl);
+            return res.status(202).json({
+            ok: true,
+            message: "Tài khoản Google cần xác minh email. Vui lòng kiểm tra hộp thư để hoàn tất.",
+            });
+        }
+        } else {
+        if (!user.email_da_xac_minh || user.trang_thai !== "active") {
+            await pool.query(
+            `UPDATE nguoi_dung
+            SET email_da_xac_minh=1, trang_thai='active',
+                email_token=NULL, email_token_het_han=NULL,
+                email_xac_minh_luc=COALESCE(email_xac_minh_luc, NOW())
+            WHERE id=?`,
+            [user.id]
+            );
+        }
+        }
+
+        const tokenJwt = signToken({ id: user.id, email: user.email, vai_tro: user.vai_tro });
+        res.cookie("token", tokenJwt, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: false,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+        if (!user.vai_tro) user.vai_tro = 'customer'; 
+        return res.json({ 
+        ok: true, 
+        message: "Đăng nhập Google thành công", 
+        data: { 
+        token: tokenJwt, 
+        user: { id: user.id, email: user.email, ho_ten: user.ho_ten, vai_tro: user.vai_tro } 
+        } 
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(401).json({ ok: false, message: "Xác thực Google thất bại" });
     }
-    const [pfRows] = await pool.query(
-    "SELECT ho_ten, sdt, ngay_sinh, gioi_tinh, avatar_url, ghi_chu, ngay_tao, ngay_capnhat FROM hoso_nguoidung WHERE nguoidung_id = ? LIMIT 1",
-    [userId]
-    );
-
-    return res.json({
-    account: accRows[0],
-    profile: pfRows.length ? pfRows[0] : null,
-    });
-} catch (err) {
-    console.error("ME ERR:", err);
-    return res.status(500).json({ error: "Lỗi server" });
 }
+
+module.exports = {
+register,
+verifyEmail,
+login,
+googleLogin,
+me,
+logout,
 };

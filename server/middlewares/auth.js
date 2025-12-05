@@ -1,16 +1,20 @@
 const jwt = require("jsonwebtoken");
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET || "dev_secret";
 
-module.exports = function auth(req, res, next) {
-  const authHeader = req.headers.authorization || "";
-  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
-  if (!token) return res.status(401).json({ error: "Thiếu token" });
+module.exports = function auth(req, _res, next) {
+const bearer = req.headers.authorization?.split(" ");
+const cookieToken = req.cookies?.token;
+let token = null;
 
-  try {
-    const payload = jwt.verify(token, JWT_SECRET);
-    req.user = { id: payload.id, role: payload.role };
-    next();
-  } catch {
-    return res.status(401).json({ error: "Token không hợp lệ / hết hạn" });
-  }
+if (bearer && bearer[0] === "Bearer") token = bearer[1];
+if (!token && cookieToken) token = cookieToken;
+
+if (!token) { req.user = null; return next(); }
+
+try {
+    req.user = jwt.verify(token, JWT_SECRET); 
+} catch {
+    req.user = null;
+}
+next();
 };

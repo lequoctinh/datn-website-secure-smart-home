@@ -1,21 +1,25 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleDown, faMagnifyingGlass, faUser, faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 import { useMediaQuery } from "react-responsive";
-import AuthOverlay from "../components/auth/AuthOverlay";
 import "./css/Header.css";
-
+import { useAuth } from "../context/AuthContext";
 function Header() {
+const navigate = useNavigate();
 const isTablet = useMediaQuery({ minWidth: 768, maxWidth: 1023 });
 const [showSearch, setShowSearch] = useState(false);
-const [showAuth, setShowAuth] = useState(false);
-
 const [menuOpen, setMenuOpen] = useState(false);
 const [openDrop1, setOpenDrop1] = useState(false);
 const [openDrop2, setOpenDrop2] = useState(false);
 const [openDrop3, setOpenDrop3] = useState(false);
 const [openDrop4, setOpenDrop4] = useState(false);
+
+const { me, logout, loading } = useAuth();
+const [userMenuOpen, setUserMenuOpen] = useState(false);
+const avatarSrc = me?.google_avatar_url || me?.avatar_url || "/avatar-default.png";
+const displayName = me?.ho_ten || (me?.email ? me.email.split("@")[0] : "Tài khoản");
 const closeAllTablet = () => 
 { 
     setMenuOpen(false); 
@@ -33,20 +37,73 @@ useEffect(() => {
 
 return (
     <div className="ConTaiNer-Header w-full fixed top-0 left-0 z-50">
-    <div className="header-navbar max-w-[1200px] mx-auto px-4 py-3">
+    <div className="header-navbar mx-auto px-4 py-3">
         {isTablet ? (
         <>
             <div className="header-navbar_top flex justify-between items-center mb-2">
                 <div className="header-navbar_logo">
-                    <Link to="/" onClick={closeAllTablet}><img src="/SecureHome.png" alt="Logo" className="h-14" /></Link>
+                    <Link to="/" onClick={closeAllTablet}><img src="/nexahome.png" alt="Logo" className="h-14" /></Link>
                 </div>
                 <div className="header-navbar_item flex items-center gap-4 text-lg">
                     <button type="button" className="item-search" onClick={() => setShowSearch(true)} aria-label="Mở tìm kiếm" title="Tìm kiếm">
                         <FontAwesomeIcon icon={faMagnifyingGlass} />
                     </button>
-                    <button type="button" className="item-users" onClick={() => setShowAuth(true)} aria-label="Đăng nhập/Đăng ký" title="Đăng nhập/Đăng ký">
+                    {loading ? (
+                        <div className="item-users"><FontAwesomeIcon icon={faUser} /></div>
+                    ) : me ? (
+                        <div
+                        className="relative"
+                        onMouseEnter={() => setUserMenuOpen(true)}
+                        onMouseLeave={() => setUserMenuOpen(false)}
+                        >
+                        <Link to="/tai-khoan" className="item-users" aria-label="Tài khoản" title="Tài khoản">
+                            <img
+                            src={avatarSrc}
+                            alt="avatar"
+                            className="h-8 w-8 rounded-full object-cover border border-white/30"
+                            referrerPolicy="no-referrer"
+                            />
+                        </Link>
+
+                        {userMenuOpen && (
+                            <div className="absolute right-0  w-56 bg-white text-black rounded-md shadow-lg overflow-hidden z-50">
+                                <div className="px-4 py-3 flex items-center gap-3 border-b">
+                                    <img src={avatarSrc} alt="avatar" className="h-10 w-10 rounded-full object-cover" />
+                                    <div className="min-w-0">
+                                    <div className="font-semibold truncate">{displayName}</div>
+                                    <div className="text-sm text-gray-600 truncate">{me.email}</div>
+                                    </div>
+                                </div>
+                                <ul className="py-1">
+                                    <li><Link className="block px-4 py-2 hover:bg-gray-100" to="/tai-khoan">Hồ sơ cá nhân</Link></li>
+                                    <li><Link className="block px-4 py-2 hover:bg-gray-100" to="/don-hang">Lịch sử đơn hàng</Link></li>
+                                    <li>
+                                    <button className="w-full text-left px-4 py-2 hover:bg-gray-100" onClick={async () => {
+                                        try {
+                                            await logout();
+                                            toast.success("Bạn đã đăng xuất!", {
+                                            autoClose: 1200,
+                                            onClose: () => navigate(0), 
+                                            });
+                                            navigate("/auth-page", { replace: true }); 
+                                        } catch (err) {
+                                            toast.error("Đăng xuất thất bại, vui lòng thử lại.");
+                                            console.error("LOGOUT ERROR:", err?.message || err);
+                                        }
+                                        }}
+                                    >
+                                        Đăng xuất
+                                    </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        )}
+                        </div>
+                    ) : (
+                        <Link to="/auth-page" className="item-users" aria-label="Tài khoản" title="Tài khoản">
                         <FontAwesomeIcon icon={faUser} />
-                    </button>
+                        </Link>
+                    )}
                     <div className="item-cart">
                         <FontAwesomeIcon icon={faShoppingCart} />
                     </div>
@@ -61,9 +118,8 @@ return (
             {menuOpen && (
             <nav className="tabletMenu px-2 pb-2">
                 <ul className="tabletMenu-list space-y-2">
-                 <li><Link to="/tin-tuc" onClick={closeAllTablet}>Tin tức</Link></li>   
                 <li><Link to="/ve-chung-toi" onClick={closeAllTablet}>Về chúng tôi</Link></li>
-
+                <li><Link to="/tin-tuc" onClick={closeAllTablet}>Tin Tức</Link></li>
                 <li className="tablet-dd">
                     <button type="button" className="tablet-dd-toggle" onClick={() => setOpenDrop1(v => !v)} aria-expanded={openDrop1}>Khóa cửa thông minh 
                         <span className={`chev ${openDrop1 ? "rot" : ""}`}>&#9662;</span>
@@ -125,16 +181,73 @@ return (
         ) : (
         <>
             <div className="header-navbar_logo">
-                <Link to="/"><img src="/SecureHome.png" alt="Logo" className="h-14" /></Link>
+                <Link to="/"><img src="/nexahome.png" alt="Logo" className="h-14" /></Link>
             </div>
             <div className="header-navbar_menu">
                 <ul className="list-menu flex space-x-6 items-center text-[15px] font-medium">{renderMenu()}</ul>
             </div>
             <div className="header-navbar_item flex items-center gap-4 text-lg">
                 <button type="button" className="item-search" onClick={() => setShowSearch(true)} aria-label="Mở tìm kiếm" title="Tìm kiếm">
-                    <FontAwesomeIcon icon={faMagnifyingGlass} /></button>
-                <button type="button" className="item-users" onClick={() => setShowAuth(true)} aria-label="Đăng nhập/Đăng ký" title="Đăng nhập/Đăng ký">
-                    <FontAwesomeIcon icon={faUser} /></button>
+                    <FontAwesomeIcon icon={faMagnifyingGlass} />
+                </button>
+                {loading ? (
+                    <div className="item-users"><FontAwesomeIcon icon={faUser} /></div>
+                ) : me ? (
+                    <div
+                    className="relative"
+                    onMouseEnter={() => setUserMenuOpen(true)}
+                    onMouseLeave={() => setUserMenuOpen(false)}
+                    >
+                    <Link to="/tai-khoan" className="item-users" aria-label="Tài khoản" title="Tài khoản">
+                        <img
+                        src={avatarSrc}
+                        alt="avatar"
+                        className="h-8 w-8 rounded-full object-cover border border-white/30"
+                        referrerPolicy="no-referrer"
+                        />
+                    </Link>
+
+                    {userMenuOpen && (
+                        <div className="absolute right-0 w-56 bg-white text-black rounded-md shadow-lg overflow-hidden z-50">
+                        <div className="px-4 py-3 flex items-center gap-3 border-b">
+                            <img src={avatarSrc} alt="avatar" className="h-10 w-10 rounded-full object-cover" />
+                            <div className="min-w-0">
+                            <div className="font-semibold truncate">{displayName}</div>
+                            <div className="text-sm text-gray-600 truncate">{me.email}</div>
+                            </div>
+                        </div>
+                        <ul className="py-1">
+                            <li><Link className="block w-full px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-100" to="/tai-khoan">Hồ sơ cá nhân</Link></li>
+                            <li><Link className="block w-full px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-100" to="/don-hang">Lịch sử đơn hàng</Link></li>
+                            <li>
+                            <button className="block w-full text-left px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-100"
+                                onClick={async () => {
+                                try {
+                                    await logout();
+                                    toast.success("Bạn đã đăng xuất!", {
+                                    autoClose: 1200,
+                                    onClose: () => navigate(0),  
+                                    });
+                                    navigate("/auth-page", { replace: true }); 
+                                } catch (err) {
+                                    toast.error("Đăng xuất thất bại, vui lòng thử lại.");
+                                    console.error("LOGOUT ERROR:", err?.message || err);
+                                }
+                                }}
+
+                            >
+                                Đăng xuất
+                            </button>
+                            </li>
+                        </ul>
+                        </div>
+                    )}
+                    </div>
+                ) : (
+                    <Link to="/auth-page" className="item-users" aria-label="Tài khoản" title="Tài khoản">
+                    <FontAwesomeIcon icon={faUser} />
+                    </Link>
+                )}
                 <div className="item-cart"><FontAwesomeIcon icon={faShoppingCart} /></div>
             </div>
         </>
@@ -143,25 +256,22 @@ return (
 
     <div className={`search-overlay ${showSearch ? "is-open" : ""}`}>
         <div className="search-modal" role="dialog" aria-modal="true" aria-label="Search">
-        <form className="search-form" onSubmit={(e) => { e.preventDefault(); /* TODO: search */ }}>
+        <form className="search-form" onSubmit={(e) => { e.preventDefault(); }}>
             <input className="search-input" type="text" placeholder="Nhập từ khóa tìm kiếm…" autoFocus />
             <button className="search-overlay-submit" type="submit">Tìm kiếm</button>
             <button type="button" className="search-close-inline" onClick={() => setShowSearch(false)}>Đóng</button>
         </form>
         </div>
     </div>
-
-    <AuthOverlay open={showAuth} onClose={() => setShowAuth(false)} defaultMode="login" />
     </div>
 );
 }
 
-const renderMenu = () => ( 
+const renderMenu = () => (
 <>
-    <li><Link to="/tin-tuc">Tin tức</Link></li>
-    <li><Link to="/ve-chung-toi">Về chúng tôi</Link></li>
+   
     <li className="relative group">
-        <Link to="#">Khóa cửa thông minh <FontAwesomeIcon icon={faAngleDown} /></Link>
+        <Link to="/khoa-cua-thong-minh">Khóa cửa thông minh <FontAwesomeIcon icon={faAngleDown} /></Link>
         <ul className="list-menu_secure absolute hidden group-hover:block">
             <li><Link to="/khoa-van-tay-bosch">Khóa vân tay BOSCH</Link></li>
             <li><Link to="/khoa-cua-huyndai">Khóa cửa HUYNDAI</Link></li>
@@ -198,6 +308,8 @@ const renderMenu = () => (
             <li><Link to="/phu-kien-camera">Phụ kiện camera</Link></li>
         </ul>
     </li>
+     <li><Link to="/ve-chung-toi">Về chúng tôi</Link></li>
+     <li><Link to="/tin-tuc">Tin tức</Link></li>
     <li><Link to="/lien-he">Liên hệ</Link></li>
 </>
 );
