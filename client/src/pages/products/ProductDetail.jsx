@@ -5,88 +5,144 @@ import "./css/ProductDetail.css";
 const ProductDetail = () => {
   const { slug } = useParams();
 
-  
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("description");
   const [related, setRelated] = useState([]);
 
-
   const formatted = (v) =>
     Number(v).toLocaleString("vi-VN", { style: "currency", currency: "VND" });
 
-  // Load chi tiết sản phẩm từ API
-  // useEffect(() => {
-  //   if (!id) return;
-
-  //   fetch(`http://localhost:5000/api/products/${id}`)
-  //     .then((res) => res.json())
-  //     .then((data) => setProduct(data.product))
-  //     .catch((err) => console.error(err));
-  // }, [id]);
-
+  // ------------------------------
+  // ⭐ FETCH API (đúng chuẩn)
+  // ------------------------------
   useEffect(() => {
-  if (!slug) return;
+    if (!slug) return;
 
-  fetch(`http://localhost:5000/api/products/slug/${slug}`)
-    .then((res) => res.json())
-    .then((data) => setProduct(data.product))
-    .catch(console.error);
-}, [slug]);
+    fetch(`http://localhost:5000/products/slug/${slug}`)
+      .then((res) => res.json())
+      .then((data) => setProduct(data.product))
+      .catch(console.error);
 
-
-  useEffect(() => {
-  if (!slug) return;
-
-  fetch(`http://localhost:5000/api/products/${slug}/related`)
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.ok) setRelated(data.data);
-    })
-    .catch((err) => console.error(err));
-}, [slug]);
+    fetch(`http://localhost:5000/products/slug/${slug}/related`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.ok) setRelated(data.data);
+      })
+      .catch(console.error);
+  }, [slug]);
 
   if (!product) return <p>Đang tải...</p>;
+
+  // ------------------------------
+  // ⭐ Xử lý đường dẫn hình ảnh
+  // ------------------------------
+  const getImageUrl = (path) => {
+    if (!path) return "";
+    if (path.startsWith("http")) return path;
+
+    // Nếu ảnh nằm trong server/uploads
+    if (path.startsWith("uploads")) {
+      return `http://localhost:5000/${path}`;
+    }
+
+    // Nếu ảnh nằm trong client/public
+    return path;
+  };
 
   return (
     <div className="pd-container">
 
-      {/* MEDIA + THUMBNAIL */}
-      <div className="pd-media">
-
+      {/* MEDIA */}
+      {/* <div className="pd-media">
         <div className="pd-thumbs">
-          {product.images?.map((img, idx) => (
-            <img key={idx} src={img} alt="" />
-          ))}
+          <img
+            src={getImageUrl(product.anh_dai_dien)}
+            alt={product.ten_san_pham}
+            className="pd-main-img"
+          />
+        </div>
+      </div> */}
+            <div className="pd-media">
+        <img
+          className="pd-main-img"
+          src={
+            product.anh_dai_dien.startsWith("http")
+              ? product.anh_dai_dien
+              : product.anh_dai_dien
+          }
+          alt={product.ten_san_pham}
+        />
+
+        {/* Thumbnail (nếu chưa có API images thì chỉ hiện 1 cái) */}
+        <div className="pd-thumbs">
+          <img
+            src={
+              product.anh_dai_dien.startsWith("http")
+                ? product.anh_dai_dien
+                : product.anh_dai_dien
+            }
+            alt=""
+          />
         </div>
       </div>
 
-      {/* INFO */}
-      <div className="pd-info">
-        <h1>{product.ten_san_pham}</h1>
 
-        <div className="pd-price">
-          {product.gia_goc && <del>{formatted(product.gia_goc)}</del>}
-          <span className="pd-sale">{formatted(product.gia_khuyen_mai)}</span>
+      {/* INFO */}
+       <div className="pd-right">
+        <h1 className="pd-title">{product.ten_san_pham}</h1>
+
+        <div className="pd-rating-box">
+          <span className="pd-star">⭐ 4.7</span>
+          <span className="pd-review">(27 đánh giá)</span>
+          <span className="pd-sold">Đã bán 52.1k</span>
         </div>
 
-        <div className="pd-qty">
-          <button onClick={() => setQuantity(quantity > 1 ? quantity - 1 : 1)}>-</button>
+        <div className="pd-price-box">
+          <del className="pd-old">{formatted(product.gia_goc)}</del>
+          <span className="pd-new">{formatted(product.gia_khuyen_mai)}</span>
+        </div>
+
+        <ul className="pd-features">
+          <li>✔ Bật tắt và điều khiển đèn từ xa dù ở bất kỳ nơi nào</li>
+          <li>✔ Hẹn giờ bật tắt thiết bị qua điện thoại</li>
+          <li>✔ Có khả năng chia sẻ ra mọi thành viên gia đình dùng chung</li>
+          <li>✔ Lắp đặt cực kỳ dễ dàng, chỉ mất 2-3 phút</li>
+          <li>✔ Hotline 24/7: 0983.988.828</li>
+          <li>✔ HÀNG VIỆT NAM – CHẤT LƯỢNG CAO</li>
+        </ul>
+
+        {/* Quantity */}
+        <div className="pd-qty-box">
+          <button onClick={() => setQuantity(quantity > 1 ? quantity - 1 : 1)}>
+            -
+          </button>
           <span>{quantity}</span>
           <button onClick={() => setQuantity(quantity + 1)}>+</button>
         </div>
 
-        <div className="pd-actions">
-          <button className="btn-add">Thêm vào giỏ</button>
-          <button className="btn-buy">Đặt mua ngay</button>
+        {/* Buttons */}
+        <div className="pd-btn-group">
+          <button className="pd-btn-add">Thêm vào giỏ</button>
+          <button className="pd-btn-buy">Đặt mua ngay</button>
         </div>
 
-        <p className="pd-code">
-          Mã SP: <strong>{product.code}</strong>
-        </p>
-        <p className="pd-category">Danh mục: {product.category}</p>
-      </div>
+        {/* Secure Message */}
+        <div className="pd-secure-box">
+          Cam kết các sản phẩm đang bán trên website là sản phẩm chính hãng.
+          Tất cả sản phẩm đều có bảo hành.
+        </div>
 
+        {/* Product Meta */}
+        <p className="pd-meta">
+          <strong>Mã sản phẩm:</strong> {product.ma_san_pham || "ĐTBS01"}
+        </p>
+        <p className="pd-meta">
+          <strong>Danh mục:</strong> Công Tắc Điều Khiển Từ Xa, Thiết Bị Điện
+          Thông Minh
+        </p>
+      </div>
+  
       {/* TABS */}
       <div className="pd-tabs">
         <button
@@ -116,22 +172,25 @@ const ProductDetail = () => {
           </div>
         )}
       </div>
+
+      {/* RELATED */}
       <h3 className="pd-related-title">Sản phẩm liên quan</h3>
 
       <div className="pd-related-list">
         {related.map((p) => (
           <div key={p.id} className="pd-related-card">
             <a href={`/san-pham/${p.duong_dan_ten_seo}`}>
-              <img src={p.anh_dai_dien} alt={p.ten_san_pham} />
+              <img
+                src={getImageUrl(p.anh_dai_dien)}
+                alt={p.ten_san_pham}
+                className="pd-related-img"
+              />
             </a>
             <p>{p.ten_san_pham}</p>
-
-            <strong>
-              {p.gia_khuyen_mai?.toLocaleString("vi-VN")} đ
-            </strong>
+            <strong>{Number(p.gia_khuyen_mai).toLocaleString("vi-VN")} đ</strong>
           </div>
         ))}
-      </div>  
+      </div>
     </div>
   );
 };

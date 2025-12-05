@@ -117,7 +117,7 @@ async function getRelatedProducts(req, res) {
 
 
 async function getProductBySlug(req, res) {
-  const param = req.params.id_or_slug;
+  const param = req.params.slug;
 
   try {
     let query, values;

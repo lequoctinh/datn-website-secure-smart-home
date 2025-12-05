@@ -39,7 +39,7 @@ function TopSellingProducts() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/stats/top-selling")
+      .get("http://localhost:5000/stats/top-selling")
       .then((res) => {
         if (res.data.ok) {
           setTopProducts(res.data.data);

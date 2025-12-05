@@ -41,8 +41,8 @@ res.json({ message: "NexaHome backend API đang hoạt động!" });
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
 
 app.use("/auth", require("./routes/authRoutes"));
-app.use("/api/products", require("./routes/productUserRoutes"));
-app.use("/api/stats", require("./routes/productUserRoutes"));
+app.use("/products", require("./routes/productUserRoutes"));
+app.use("/stats", require("./routes/productUserRoutes"));
 app.use("/news", require("./routes/newsRoutes"));
 app.use("/users", require("./routes/userRoutes"));
 app.use("/admin/products", require("./routes/productRoutes"));
