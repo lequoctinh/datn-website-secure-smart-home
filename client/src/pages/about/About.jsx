@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // import React from "react";
 // import BannerAbout from "../about/components/BannerAbout"
 // import IntroducingTheCompany from "./components/IntroducingTheCompany"; 
@@ -52,28 +51,6 @@ return (
             <li>Thi công chuẩn – bảo hành nhanh – bảo trì tận nơi.</li>
             <li>Hỗ trợ kỹ thuật 24/7, dễ dàng mở rộng nâng cấp.</li>
         </ul>
-=======
-import React from "react";
-import BannerAbout from "../about/components/BannerAbout"
-import IntroducingTheCompany from "./components/IntroducingTheCompany"; 
-import AboutTeam from './components/AboutTeam';
-import PartnerSlider from'./components/PartnerSlider';
-import CompanyVideo from "./components/CompanyVideo";
-
-function About() {
-    return(
-        <div className="Container-About">
-            <div className="Container-About_banner">
-                <BannerAbout />
-            </div>
-            <div className="Container-About_main">
-                <IntroducingTheCompany />
-                <PartnerSlider/>
-                <CompanyVideo/>
-                <AboutTeam/>
-                
-            </div> 
->>>>>>> feature/news-page
         </div>
     </section>
 

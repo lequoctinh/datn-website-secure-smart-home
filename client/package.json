@@ -15,11 +15,7 @@
     "@fortawesome/free-solid-svg-icons": "^7.0.0",
     "@fortawesome/react-fontawesome": "^0.2.6",
     "aos": "^2.3.4",
-<<<<<<< HEAD
-    "axios": "^1.11.0",
-=======
     "axios": "^1.13.2",
->>>>>>> feature/news-page
     "framer-motion": "^12.23.12",
     "react": "^19.1.0",
     "react-awesome-button": "^7.0.5",
@@ -29,13 +25,9 @@
     "react-hot-toast": "^2.6.0",
     "react-responsive": "^10.0.1",
     "react-router-dom": "^7.7.1",
-<<<<<<< HEAD
-    "react-toastify": "^11.0.5",
-=======
     "react-slick": "^0.31.0",
     "react-toastify": "^11.0.5",
     "slick-carousel": "^1.8.1",
->>>>>>> feature/news-page
     "swiper": "^11.2.10"
   },
   "devDependencies": {

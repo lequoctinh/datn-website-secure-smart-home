@@ -15,6 +15,6 @@ router.get("/:id", orderController.getOrderById);
 router.put("/:id/status", orderController.updateOrderStatus);
 
 // Lấy chi tiết đơn hàng
-router.get("/:id", getOrderById);
+router.get("/:id",orderController.getOrderById);
 
 module.exports = router;
