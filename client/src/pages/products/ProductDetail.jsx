@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { faAngleRight, } from "@fortawesome/free-solid-svg-icons";
+import { Link } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "./css/ProductDetail.css";
 
 const ProductDetail = () => {
@@ -13,9 +16,7 @@ const ProductDetail = () => {
   const formatted = (v) =>
     Number(v).toLocaleString("vi-VN", { style: "currency", currency: "VND" });
 
-  // ------------------------------
-  // ⭐ FETCH API (đúng chuẩn)
-  // ------------------------------
+
   useEffect(() => {
     if (!slug) return;
 
@@ -34,9 +35,6 @@ const ProductDetail = () => {
 
   if (!product) return <p>Đang tải...</p>;
 
-  // ------------------------------
-  // ⭐ Xử lý đường dẫn hình ảnh
-  // ------------------------------
   const getImageUrl = (path) => {
     if (!path) return "";
     if (path.startsWith("http")) return path;
@@ -53,16 +51,20 @@ const ProductDetail = () => {
   return (
     <div className="pd-container">
 
-      {/* MEDIA */}
-      {/* <div className="pd-media">
-        <div className="pd-thumbs">
-          <img
-            src={getImageUrl(product.anh_dai_dien)}
-            alt={product.ten_san_pham}
-            className="pd-main-img"
-          />
+      {/* Breadcrumb */}
+      {/* --- BREADCRUMB --- */}
+        <div className="breadcrumb">
+          <span onClick={() => navigate("/")}>Trang chủ</span>
+          <span className="separator">/</span>
+          <span onClick={() => navigate(`/danh-muc/${product?.danh_muc_id}`)}>
+            {product?.danh_muc_ten || "Danh mục"}
+          </span>
+          <span className="separator">/</span>
+          <span className="current">{product?.ten_san_pham}</span>
         </div>
-      </div> */}
+
+
+      {/* MEDIA */}
             <div className="pd-media">
         <img
           className="pd-main-img"

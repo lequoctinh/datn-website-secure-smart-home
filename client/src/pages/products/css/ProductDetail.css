@@ -13,6 +13,7 @@
   grid-template-columns: 50% 45%;
   gap: 50px;
   margin-top: 30px;
+  margin-bottom: 100px;
 }
 
 /* MEDIA */
@@ -387,4 +388,34 @@
   .pd-wrapper {
     grid-template-columns: 1fr;
   }
+}
+
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  margin-bottom: 20px;
+  color: #8a6d1f;
+}
+
+.breadcrumb span {
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.breadcrumb span:hover {
+  color: #c29b2b;
+}
+
+.breadcrumb .separator {
+  color: #a88a43;
+  cursor: default !important;
+}
+
+.breadcrumb .current {
+  font-weight: bold;
+  color: #c29b2b;
+  cursor: default !important;
 }
