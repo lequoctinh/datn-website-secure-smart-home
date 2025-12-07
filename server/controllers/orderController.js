@@ -208,3 +208,19 @@ exports.updateOrderStatus = async (req, res) => {
     res.status(500).json({ message: "Lỗi server" });
   }
 };
+
+// GET /api/admin/orders  (lấy tất cả đơn hàng) - cho admin
+exports.getAllOrders = async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT id, order_code, user_id, total, payment_method, status, created_at
+      FROM orders
+      ORDER BY created_at DESC
+    `);
+
+    res.json(rows);
+  } catch (err) {
+    console.error("getAllOrders:", err);
+    res.status(500).json({ message: "Lỗi server" });
+  }
+};
