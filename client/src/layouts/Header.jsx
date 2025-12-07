@@ -15,6 +15,7 @@ const [openDrop1, setOpenDrop1] = useState(false);
 const [openDrop2, setOpenDrop2] = useState(false);
 const [openDrop3, setOpenDrop3] = useState(false);
 const [openDrop4, setOpenDrop4] = useState(false);
+const [cartCount, setCartCount] = useState(0);
 
 const { me, logout, loading } = useAuth();
 const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -33,6 +34,18 @@ useEffect(() => {
     document.body.classList.add("has-fixed-header");
     return () => 
         document.body.classList.remove("has-fixed-header");
+}, []);
+useEffect(() => {
+    const updateCartCount = () => {
+        const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+        const total = cart.reduce((sum, item) => sum + (item.quantity || 0), 0);
+        setCartCount(total);
+    };
+
+    updateCartCount();
+    window.addEventListener("cart-updated", updateCartCount);
+
+    return () => window.removeEventListener("cart-updated", updateCartCount);
 }, []);
 
 return (
@@ -104,9 +117,20 @@ return (
                         <FontAwesomeIcon icon={faUser} />
                         </Link>
                     )}
-                    <div className="item-cart">
+                    <Link to="/cart" className="item-cart relative">
                         <FontAwesomeIcon icon={faShoppingCart} />
-                    </div>
+
+                        {cartCount > 0 && (
+                           <span className="
+                               absolute -top-2 -right-2
+                               bg-red-500 text-white text-xs rounded-full
+                               px-1.5 py-0.5
+                          ">
+                              {cartCount}
+                          </span>
+                  )}
+                    </Link>
+
                     <button type="button" className="tablet-menuToggle ml-2 px-3 py-2 rounded border border-white/30 text-white" 
                         onClick={() => setMenuOpen(!menuOpen)} 
                         aria-expanded={menuOpen} 
@@ -248,7 +272,20 @@ return (
                     <FontAwesomeIcon icon={faUser} />
                     </Link>
                 )}
-                <div className="item-cart"><FontAwesomeIcon icon={faShoppingCart} /></div>
+                <Link to="/cart" className="item-cart relative">
+                   <FontAwesomeIcon icon={faShoppingCart} />
+
+                   {cartCount > 0 && (
+                       <span className="
+                           absolute -top-2 -right-2
+                           bg-red-500 text-white text-xs rounded-full
+                           px-1.5 py-0.5
+                      ">
+                           {cartCount}
+                       </span>
+                   )}
+                </Link>
+
             </div>
         </>
         )}

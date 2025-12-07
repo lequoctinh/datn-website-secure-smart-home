@@ -370,3 +370,19 @@ body.has-fixed-header {
     font-size: 16px;
 }
 }
+.cart-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: #ff4444;
+    color: white;
+    font-size: 11px;
+    height: 18px;
+    min-width: 18px;
+    padding: 0 4px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+}

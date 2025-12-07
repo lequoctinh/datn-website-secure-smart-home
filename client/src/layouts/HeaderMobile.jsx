@@ -11,6 +11,21 @@ function HeaderMobile() {
 const isMobile = useMediaQuery({ maxWidth: 767 });
 const navigate = useNavigate();
 const { me, logout, loading } = useAuth();
+const [cartCount, setCartCount] = useState(0);
+
+React.useEffect(() => {
+    const updateCartCount = () => {
+        const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+        const total = cart.reduce((sum, item) => sum + (item.quantity || 0), 0);
+        setCartCount(total);
+    };
+
+    updateCartCount();
+    window.addEventListener("cart-updated", updateCartCount);
+
+    return () => window.removeEventListener("cart-updated", updateCartCount);
+}, []);
+
 
 const [menuOpen, setMenuOpen] = useState(false);
 const [openDropdown1, setOpenDropdown1] = useState(false);
@@ -56,7 +71,21 @@ return (
             <FontAwesomeIcon icon={faUser} />
             )}
             </button>
-            <div className="item-cartMobile text-xl cursor-pointer"><FontAwesomeIcon icon={faShoppingCart} /></div>
+            <Link to="/cart" className="item-cartMobile text-xl cursor-pointer relative" onClick={closeAll}>
+               <FontAwesomeIcon icon={faShoppingCart} />
+
+               {cartCount > 0 && (
+                   <span
+                       className="
+                           absolute -top-2 -right-2 bg-red-500
+                           text-white text-xs px-1.5 py-0.5 rounded-full
+                       "
+                   >
+                       {cartCount}
+                   </span>
+               )}
+            </Link>
+
         </div>
     </div>
 

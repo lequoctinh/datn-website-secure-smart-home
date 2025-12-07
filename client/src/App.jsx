@@ -28,6 +28,9 @@ const AdminProducts = lazy(() => import("./admin/pages/products/ProductsList"));
 const AdminProductForm = lazy(() => import("./admin/pages/products/ProductForm"));
 const AdminBrands = lazy(() => import("./admin/pages/brands/BrandsList"));
 const AdminBrandForm = lazy(() => import("./admin/pages/brands/BrandForm"));
+const AdminOrdersList = lazy(() => import("./admin/pages/orders/AdminOrdersList"));
+const AdminOrderDetail = lazy(() => import("./admin/pages/orders/AdminOrderDetail"));
+
 function App() {
   const location = useLocation();
   const isAdminRoute =
@@ -53,6 +56,8 @@ function App() {
             <Route path="brands" element={<AdminBrands />} />
             <Route path="brands/new" element={<AdminBrandForm />} />
             <Route path="brands/:id" element={<AdminBrandForm />} />
+            <Route path="orders" element={<AdminOrdersList />} />
+            <Route path="orders/:id" element={<AdminOrderDetail />} />
             
 
                         
@@ -90,7 +95,7 @@ function App() {
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/order/:id" element={<OrderDetailPage />} />
             <Route path="/order-success" element={<OrderSuccess />} />
-
+            
           </Routes>
         </Layout>
       )}

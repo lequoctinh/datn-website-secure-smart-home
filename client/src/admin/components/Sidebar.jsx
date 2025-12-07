@@ -48,7 +48,14 @@ return (
     </svg>
 );
 }
-
+function IconOrders() {
+  return (
+    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M3 7h18M6 3h12v18H6z" />
+      <path d="M8 11h8M8 15h5" />
+    </svg>
+  );
+}
 function Sidebar({ open, onToggle }) {
     const navigate = useNavigate();
 
@@ -113,6 +120,10 @@ return (
         <NavLink to="/admin/products" className={itemCls}>
             <IconProducts />
             {open && <span>Sản phẩm</span>}
+        </NavLink>
+        <NavLink to="/admin/orders" className={itemCls}>
+            <IconOrders />
+            {open && <span>Quản lý đơn hàng</span>}
         </NavLink>
     </nav>
 

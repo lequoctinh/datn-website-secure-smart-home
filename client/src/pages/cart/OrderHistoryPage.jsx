@@ -18,7 +18,7 @@ export default function OrderHistoryPage() {
   const [statusFilter, setStatusFilter] = useState("");
   const [paymentFilter, setPaymentFilter] = useState("");
 
-  const userId = 1; // Sau này thay bằng token
+  const userId = 1; // sau này thay bằng token
 
   // ======================================================
   // 1. Lấy lịch sử đơn hàng từ API
@@ -38,7 +38,7 @@ export default function OrderHistoryPage() {
   }, []);
 
   // ======================================================
-  // 2. Bộ lọc
+  // 2. Áp dụng bộ lọc
   // ======================================================
   useEffect(() => {
     let result = [...orders];
@@ -67,12 +67,11 @@ export default function OrderHistoryPage() {
     setSearchCode("");
     setStatusFilter("");
     setPaymentFilter("");
-
     setFiltered(orders);
   };
 
   // ======================================================
-  // 4. Mua lại đơn cũ → thêm vào giỏ hàng
+  // 4. Mua lại đơn hàng → thêm vào giỏ
   // ======================================================
   const handleReorder = async (orderId) => {
     try {
@@ -109,19 +108,52 @@ export default function OrderHistoryPage() {
   };
 
   // ======================================================
-  // 5. Render giao diện (giữ nguyên 100% UI cũ)
+  // 5. Xuất CSV
+  // ======================================================
+  const exportCSV = () => {
+    if (filtered.length === 0) {
+      alert("Không có dữ liệu để xuất!");
+      return;
+    }
+
+    const header = [
+      "Mã đơn",
+      "Ngày tạo",
+      "Trạng thái",
+      "Thanh toán",
+      "Tổng tiền",
+    ];
+
+    const rows = filtered.map((o) => [
+      o.order_code,
+      new Date(o.created_at).toLocaleString(),
+      o.status,
+      o.payment_method,
+      o.total,
+    ]);
+
+    const csvContent =
+      "data:text/csv;charset=utf-8,\uFEFF" +
+      [header.join(","), ...rows.map((r) => r.join(","))].join("\n");
+
+    const link = document.createElement("a");
+    link.href = encodeURI(csvContent);
+    link.download = `lich-su-don-hang.csv`;
+    link.click();
+  };
+
+  // ======================================================
+  // 6. Render giữ nguyên 100% UI cũ
   // ======================================================
   return (
     <div className="w-full bg-gray-100 py-10">
       <div className="max-w-7xl mx-auto bg-white p-8 rounded-2xl shadow-sm">
-
         <h2 className="text-2xl font-semibold mb-6 text-gray-800">
           Lịch sử đơn hàng
         </h2>
 
         {/* Filters */}
         <div className="flex flex-wrap gap-4 mb-6">
-
           <input
             className="border rounded-lg px-4 py-2 text-gray-700 w-60"
             placeholder="Tìm theo mã đơn"
@@ -160,10 +192,12 @@ export default function OrderHistoryPage() {
             Làm mới
           </button>
 
-          <button className="bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700">
+          <button
+            onClick={exportCSV}
+            className="bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700"
+          >
             Xuất CSV
           </button>
-
         </div>
 
         {/* Table */}
@@ -183,10 +217,8 @@ export default function OrderHistoryPage() {
             <tbody>
               {filtered.map((order) => (
                 <tr key={order.id} className="border-b hover:bg-gray-50">
-
                   <td className="py-3 px-4 font-semibold text-gray-700">
                     {order.order_code}
-
                     <Link
                       to={`/order/${order.id}`}
                       className="ml-3 text-sm text-blue-600 cursor-pointer hover:underline"
@@ -230,14 +262,13 @@ export default function OrderHistoryPage() {
                       Hoá đơn
                     </span>
                   </td>
-
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
 
-        {/* Pagination UI giữ nguyên */}
+        {/* Pagination UI */}
         <div className="flex justify-between items-center mt-6 text-gray-700">
           <p>{filtered.length} đơn • Trang 1/1</p>
 
@@ -250,7 +281,6 @@ export default function OrderHistoryPage() {
             </button>
           </div>
         </div>
-
       </div>
     </div>
   );
