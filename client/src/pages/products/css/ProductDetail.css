@@ -391,14 +391,6 @@
 }
 
 
-.breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  margin-bottom: 20px;
-  color: #8a6d1f;
-}
 
 .breadcrumb span {
   cursor: pointer;
@@ -418,4 +410,148 @@
   font-weight: bold;
   color: #c29b2b;
   cursor: default !important;
+}
+
+.pd-container .breadcrumb {
+  grid-column: 1 / -1; /* chiếm toàn bộ cột grid */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  margin: 0 0 18px 0; /* cách dưới 18px */
+  color: #8a6d1f;
+}
+.pd-container .breadcrumb .crumb-link {
+  cursor: pointer;
+  color: #8a6d1f;
+  transition: color .15s;
+}
+.pd-container .breadcrumb .crumb-link:hover {
+  color: #c29b2b;
+}
+
+/* phân cách */
+.pd-container .breadcrumb .separator {
+  color: #a88a43;
+  cursor: default;
+}
+
+/* tên hiện tại (không click) */
+.pd-container .breadcrumb .current {
+  font-weight: 700;
+  color: #c29b2b;
+  cursor: default;
+}
+
+/* Responsive: breadcrumb vẫn full width trên mobile */
+@media (max-width: 900px) {
+  .pd-container .breadcrumb {
+    padding: 0 4px;
+    font-size: 13px;
+  }
+}
+/* GRID */
+.related-grid {
+  grid-column: span 2;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 25px;
+}
+
+/* CARD */
+.related-card {
+  border-radius: 22px;
+  padding: 20px 18px;
+  background:var(--card-bg);
+  border:1px solid var(--card-border);
+  border-radius:12px;
+  box-shadow:var(--shadow);
+  overflow:hidden;transition:transform .2s, box-shadow .2s, border-color .2s;
+  display:flex;
+  flex-direction:column;
+  height:100%;
+}
+.related-card:hover{
+  transform:translateY(-2px);box-shadow:0 12px 28px rgba(0,0,0,.1);border-color:var(--brand-gold)
+}
+
+/* IMG WRAPPER */
+.related-img-wrapper {
+  background: #ffffff;
+  border-radius: 16px;
+  height: 260px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.related-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* NAME */
+.related-name {
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 12px;
+  min-height: 45px;
+}
+
+/* PRICE */
+.related-price {
+  margin-top: 8px;
+}
+
+.related-price del {
+  color: #888;
+  margin-right: 8px;
+}
+
+.related-price .new-price {
+  font-weight: 700;
+  color: #d62828;
+  font-size: 17px;
+}
+
+/* BUTTON BOX */
+.related-btn-box {
+  margin-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* SO SÁNH Btn */
+.btn-compare {
+  padding: 10px 18px;
+  border: 2px solid #d4a017;
+  background: transparent;
+  color: #d4a017;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-compare:hover {
+  background: #d4a017;
+  color: #fff;
+}
+
+/* CART Btn */
+.btn-cart {
+  width: 45px;
+  height: 45px;
+  background: #d4a017;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.btn-cart i {
+  font-size: 20px;
+  color: #fff;
 }

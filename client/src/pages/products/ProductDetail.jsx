@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { faAngleRight, } from "@fortawesome/free-solid-svg-icons";
+import { useParams, useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "./css/ProductDetail.css";
+import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 
 const ProductDetail = () => {
   const { slug } = useParams();
+  const navigate = useNavigate()
 
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
@@ -52,16 +53,20 @@ const ProductDetail = () => {
     <div className="pd-container">
 
       {/* Breadcrumb */}
-      {/* --- BREADCRUMB --- */}
         <div className="breadcrumb">
-          <span onClick={() => navigate("/")}>Trang chủ</span>
-          <span className="separator">/</span>
-          <span onClick={() => navigate(`/danh-muc/${product?.danh_muc_id}`)}>
-            {product?.danh_muc_ten || "Danh mục"}
-          </span>
-          <span className="separator">/</span>
-          <span className="current">{product?.ten_san_pham}</span>
-        </div>
+        <span className="crumb-link" onClick={() => navigate("/")}>
+          Trang chủ
+        </span>
+        <span className="separator">/</span>
+        <span
+          className="crumb-link"
+          onClick={() => navigate(`/danh-muc/${product?.danh_muc_id || ""}`)}
+        >
+          {product?.danh_muc_ten || "Danh mục"}
+        </span>
+        <span className="separator">/</span>
+        <span className="current">{product?.ten_san_pham}</span>
+      </div>
 
 
       {/* MEDIA */}
@@ -75,8 +80,6 @@ const ProductDetail = () => {
           }
           alt={product.ten_san_pham}
         />
-
-        {/* Thumbnail (nếu chưa có API images thì chỉ hiện 1 cái) */}
         <div className="pd-thumbs">
           <img
             src={
@@ -176,7 +179,7 @@ const ProductDetail = () => {
       </div>
 
       {/* RELATED */}
-      <h3 className="pd-related-title">Sản phẩm liên quan</h3>
+      {/* <h3 className="pd-related-title">Sản phẩm liên quan</h3>
 
       <div className="pd-related-list">
         {related.map((p) => (
@@ -192,7 +195,41 @@ const ProductDetail = () => {
             <strong>{Number(p.gia_khuyen_mai).toLocaleString("vi-VN")} đ</strong>
           </div>
         ))}
+      </div> */}
+      {/* RELATED */}
+<h3 className="pd-related-title">Sản phẩm liên quan</h3>
+
+<div className="related-grid">
+  {related.map((p) => (
+    <div key={p.id} className="related-card">
+      <a href={`/san-pham/${p.duong_dan_ten_seo}`}>
+        <div className="related-img-wrapper">
+          <img
+            src={getImageUrl(p.anh_dai_dien)}
+            alt={p.ten_san_pham}
+          />
+        </div>
+      </a>
+
+      <p className="related-name">{p.ten_san_pham}</p>
+
+      <div className="related-price">
+        <del>{Number(p.gia_goc).toLocaleString("vi-VN")} đ</del>
+        <span className="new-price">
+          {Number(p.gia_khuyen_mai).toLocaleString("vi-VN")} đ
+        </span>
       </div>
+
+      <div className="related-btn-box">
+        <button className="btn-compare">So sánh</button>
+        <button type="button" className="SLP-cart" aria-label="Thêm vào giỏ">
+          <FontAwesomeIcon icon={faShoppingCart} />
+        </button>
+      </div>
+    </div>
+  ))}
+</div>
+
     </div>
   );
 };
