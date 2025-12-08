@@ -38,7 +38,7 @@ return (
             <h2>AN TOÀN MỖI NGÀY - KHỞI ĐẦU HẠNH PHÚC CÙNG NEXA HOME</h2>
             <p>Hãy để ngôi nhà của bạn trở thành nơi đáng sống nhất – với những giải pháp thông minh và tinh tế từ NexaHome!</p>
             <input type="text"  placeholder="Số điện thoại"/>
-            <button className="submit-advise">Đăng kí tư vấn</button>
+            <a href="/lien-he"><button className="submit-advise" >Đăng kí tư vấn</button></a>
         </div>
     
     </div>

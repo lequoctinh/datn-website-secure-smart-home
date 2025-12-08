@@ -18,6 +18,16 @@ import OrderDetailPage from "./pages/cart/OrderDetailPage";
 import OrderSuccess from "./pages/cart/OrderSuccess";
 import NewsDetail from "./pages/news/controller/NewsDetail";
 import ProductDetail from "./pages/products/ProductDetail";
+import BoschFingerprintLock from "./pages/bosch/BoschFingerprintLock";
+import HyundaiDoorLock from "./pages/hyundai/HyundaiDoorLock";
+import HafeleDoorLock from "./pages/hafele/HafeleDoorLock";
+import HubertDoorLock from "./pages/hubert/HubertDoorLock";
+import EzvizDoorLock from "./pages/ezviz/EzvizDoorLock";
+import Kassler from "./pages/kassler/Kassler";
+import Kaadas from "./pages/kaadas/Kaadas";
+
+
+
 
 
 const AdminLayout = lazy(() => import("./admin/adminlayout/AdminLayout"));
@@ -95,6 +105,17 @@ function App() {
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/order/:id" element={<OrderDetailPage />} />
             <Route path="/order-success" element={<OrderSuccess />} />
+            <Route path="/khoa-van-tay-bosch" element={<BoschFingerprintLock />} />
+            <Route path="/khoa-cua-huyndai" element={<HyundaiDoorLock />} />
+            <Route path="/khoa-cua-hafele" element={<HafeleDoorLock />} />
+            <Route path="/khoa-cua-hubert" element={<HubertDoorLock />} />
+            <Route path="/khoa-cua-ezviz" element={<EzvizDoorLock />} />
+            <Route path="/khoa-cua-kassler" element={<Kassler />} />
+            <Route path="/khoa-cua-kaadas" element={<Kaadas />} />
+
+
+
+
             
           </Routes>
         </Layout>
