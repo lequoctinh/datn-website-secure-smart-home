@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "./css/ProductDetail.css";
 import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
+import { toast } from "react-toastify";
+
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -48,6 +50,48 @@ const ProductDetail = () => {
     // Nếu ảnh nằm trong client/public
     return path;
   };
+ const handleAddToCart = async () => {
+    const res = await fetch("http://localhost:5000/api/cart/add", {
+        method: "POST",
+        credentials: "include",   // <== gửi cookie
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            productId: product.id,
+            quantity,
+        }),
+    });
+
+    const data = await res.json();
+    alert(data.message);
+};
+
+const handleBuyNow = async () => {
+    const res = await fetch("http://localhost:5000/api/cart/buy-now", {
+        method: "POST",
+        credentials: "include", 
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            productId: product.id,
+            quantity,
+        }),
+    });
+
+    const data = await res.json();
+
+    if (data.ok) {
+        toast.success("Đặt hàng thành công!");
+        setTimeout(() => {
+            navigate(`/checkout/${data.orderId}`);
+        }, 1200);
+    } else {
+        toast.error(data.message || "Đặt hàng thất bại!");
+    }
+};
+
 
   return (
     <div className="pd-container">
@@ -128,8 +172,9 @@ const ProductDetail = () => {
 
         {/* Buttons */}
         <div className="pd-btn-group">
-          <button className="pd-btn-add">Thêm vào giỏ</button>
-          <button className="pd-btn-buy">Đặt mua ngay</button>
+          <button className="pd-btn-add" onClick={handleAddToCart}>Thêm vào giỏ</button>
+
+          <button className="pd-btn-buy" onClick={handleBuyNow}>Đặt mua ngay</button>
         </div>
 
         {/* Secure Message */}

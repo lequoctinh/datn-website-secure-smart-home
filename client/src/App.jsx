@@ -39,52 +39,53 @@ import CameraTapoTPLink from "./pages/products/cameratapotplink/CameraTapoTPLink
 import CameraHanhTrinh from "./pages/products/camerahanhtrinh/CameraHanhTrinh";
 import FingerprintAccessories from "./pages/products/phukienkhoavantay/PhuKienKhoaVanTay";
 import CameraAccessories from "./pages/products/phukiencamera/PhuKienCamera"
+    
 
 
-const AdminLayout = lazy(() => import("./admin/adminlayout/AdminLayout"));
-const RequireAdmin = lazy(() => import("./admin/components/RequireAdmin"));
-const AdminDashboard = lazy(() => import("./admin/pages/Dashboard"));
-const AdminUsers = lazy(() => import("./admin/pages/users/UsersList"));
-const AdminProducts = lazy(() => import("./admin/pages/products/ProductsList"));
-const AdminProductForm = lazy(() => import("./admin/pages/products/ProductForm"));
-const AdminBrands = lazy(() => import("./admin/pages/brands/BrandsList"));
-const AdminBrandForm = lazy(() => import("./admin/pages/brands/BrandForm"));
-const AdminOrdersList = lazy(() => import("./admin/pages/orders/AdminOrdersList"));
-const AdminOrderDetail = lazy(() => import("./admin/pages/orders/AdminOrderDetail"));
+    const AdminLayout = lazy(() => import("./admin/adminlayout/AdminLayout"));
+    const RequireAdmin = lazy(() => import("./admin/components/RequireAdmin"));
+    const AdminDashboard = lazy(() => import("./admin/pages/Dashboard"));
+    const AdminUsers = lazy(() => import("./admin/pages/users/UsersList"));
+    const AdminProducts = lazy(() => import("./admin/pages/products/ProductsList"));
+    const AdminProductForm = lazy(() => import("./admin/pages/products/ProductForm"));
+    const AdminBrands = lazy(() => import("./admin/pages/brands/BrandsList"));
+    const AdminBrandForm = lazy(() => import("./admin/pages/brands/BrandForm"));
+    const AdminOrdersList = lazy(() => import("./admin/pages/orders/AdminOrdersList"));
+    const AdminOrderDetail = lazy(() => import("./admin/pages/orders/AdminOrderDetail"));
 
-function App() {
-  const location = useLocation();
-  const isAdminRoute =
-    location.pathname === "/admin" || location.pathname.startsWith("/admin/");
+    function App() {
+      const location = useLocation();
+      const isAdminRoute =
+        location.pathname === "/admin" || location.pathname.startsWith("/admin/");
 
-  return (
-    <>
-      <Suspense fallback={<div className="p-6">Đang tải admin…</div>}>
-        <Routes>
-          <Route
-            path="/admin/"
-            element={
-              <RequireAdmin>
-                <AdminLayout />
-              </RequireAdmin>
-            }
-          >
-            <Route index element={<AdminDashboard />} />
-            <Route path="users" element={<AdminUsers />} />
-            <Route path="products" element={<AdminProducts />} />
-            <Route path="products/new" element={<AdminProductForm />} />
-            <Route path="products/:id" element={<AdminProductForm />} />
-            <Route path="brands" element={<AdminBrands />} />
-            <Route path="brands/new" element={<AdminBrandForm />} />
-            <Route path="brands/:id" element={<AdminBrandForm />} />
-            <Route path="orders" element={<AdminOrdersList />} />
-            <Route path="orders/:id" element={<AdminOrderDetail />} />
-            
+      return (
+        <>
+          <Suspense fallback={<div className="p-6">Đang tải admin…</div>}>
+            <Routes>
+              <Route
+                path="/admin/"
+                element={
+                  <RequireAdmin>
+                    <AdminLayout />
+                  </RequireAdmin>
+                }
+              >
+                <Route index element={<AdminDashboard />} />
+                <Route path="users" element={<AdminUsers />} />
+                <Route path="products" element={<AdminProducts />} />
+                <Route path="products/new" element={<AdminProductForm />} />
+                <Route path="products/:id" element={<AdminProductForm />} />
+                <Route path="brands" element={<AdminBrands />} />
+                <Route path="brands/new" element={<AdminBrandForm />} />
+                <Route path="brands/:id" element={<AdminBrandForm />} />
+                <Route path="orders" element={<AdminOrdersList />} />
+                <Route path="orders/:id" element={<AdminOrderDetail />} />
+                
 
-                        
-          </Route>
-        </Routes>
-      </Suspense>
+                            
+              </Route>
+            </Routes>
+          </Suspense>
 
       {!isAdminRoute && (
         <Layout>
@@ -146,5 +147,5 @@ function App() {
   );
 }
 
-export default App;
- 
+    export default App;
+    

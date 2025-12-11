@@ -16,14 +16,20 @@ const ORIGINS = (process.env.CORS_ORIGINS || WEB_BASE)
 .split(",")
 .map((s) => s.trim());
 
+// app.use(
+// cors({
+//     origin: (origin, cb) => {
+//     if (!origin) return cb(null, true);
+//     return cb(null, ORIGINS.includes(origin));
+//     },
+//     credentials: true,
+// })
+// );
 app.use(
-cors({
-    origin: (origin, cb) => {
-    if (!origin) return cb(null, true);
-    return cb(null, ORIGINS.includes(origin));
-    },
-    credentials: true,
-})
+    cors({
+        origin: "http://localhost:5173",   // frontend
+        credentials: true
+    })
 );
 
 
@@ -49,7 +55,16 @@ app.use("/admin/products", require("./routes/productRoutes"));
 app.use("/admin/brands", require("./routes/brandRoutes"));
 app.use("/admin/categories", require("./routes/categoryRoutes"));
 app.use("/api/customers", require("./routes/customerRoutes")); // nếu có
+app.use("/api/cart", require("./routes/cartRoutes"));
 app.use("/api/orders", require("./routes/orderRoutes"));
+app.get("/debug", (req, res) => {
+    res.json({
+        API_BASE: process.env.API_BASE_URL,
+        WEB_BASE: process.env.WEB_BASE_URL,
+        RUNNING_FROM: __dirname,
+        NODE_ENV: process.env.NODE_ENV,
+    });
+});
 
 app.use((req, res, _next) => {
 res.status(404).json({ ok: false, message: "Không tìm thấy endpoint" });

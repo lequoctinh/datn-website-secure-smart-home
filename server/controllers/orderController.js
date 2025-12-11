@@ -15,6 +15,8 @@ function generateOrderCode() {
   return `DH${y}${m}${d}-${rand}`;
 }
 
+
+
 // POST /api/orders/create
 exports.createOrder = async (req, res) => {
   /**
