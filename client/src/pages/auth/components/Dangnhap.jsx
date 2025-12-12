@@ -34,39 +34,56 @@
     };
 
     const onSubmit = async (e) => {
-        e.preventDefault();
-        const eObj = validate();
-        setErrors(eObj);
-        if (Object.keys(eObj).length) {
-            toast.error("Vui lòng điền đầy đủ thông tin.");
-            return;
-        }
+    e.preventDefault();
+    const eObj = validate();
+    setErrors(eObj);
+    if (Object.keys(eObj).length) {
+      toast.error("Vui lòng điền đầy đủ thông tin.");
+      return;
+    }
 
-        try {
-            setSubmitting(true);
+    try {
+      setSubmitting(true);
 
-            await api("/auth/login", {
-            method: "POST",
-            withCred: true,
-            body: { email: form.email, password: form.password },
-            });
-            await refresh();
-            const me = await api("/auth/me", { method: "GET", withCred: true });
-            const role = me?.data?.user?.vai_tro;
+      // 1. Gọi API Login và LẤY KẾT QUẢ TRẢ VỀ (res)
+      const res = await api("/auth/login", {
+        method: "POST",
+        withCred: true,
+        body: { email: form.email, password: form.password },
+      });
 
-            toast.success("Đăng nhập thành công!", { autoClose: 1200 });
+      // 2. QUAN TRỌNG: Lưu Token vào LocalStorage
+      // Kiểm tra xem token nằm trong res.data hay res trực tiếp tùy vào thư viện 'api' của bạn
+      // Thường là res.data.token hoặc res.data.accessToken
+      const token = res?.data?.token || res?.token || res?.data?.accessToken;
+      
+      if (token) {
+        localStorage.setItem("token", token);
+        console.log("Đã lưu Token đăng nhập:", token); // Log kiểm tra
+      } else {
+        console.warn("Đăng nhập thành công nhưng không thấy Token trả về!");
+      }
 
-            if (["admin", "nhan_vien"].includes(role)) {
-            navigate("/admin", { replace: true });
-            } else {
-            navigate("/tai-khoan", { replace: true });
-            }
-        } catch (err) {
-            toast.error(err.message || "Đăng nhập thất bại");
-        } finally {
-            setSubmitting(false);
-        }
-    };
+      // 3. Các bước tiếp theo giữ nguyên
+      await refresh();
+      const me = await api("/auth/me", { method: "GET", withCred: true });
+      const role = me?.data?.user?.vai_tro;
+
+      toast.success("Đăng nhập thành công!", { autoClose: 1200 });
+
+      if (["admin", "nhan_vien"].includes(role)) {
+        navigate("/admin", { replace: true });
+      } else {
+        navigate("/tai-khoan", { replace: true });
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || "Đăng nhập thất bại");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
 
 
     return (

@@ -13,4 +13,7 @@ router.get("/admin/users", auth, ensureAuth, requireRole("admin"), userCtrl.list
 router.get("/admin/users", auth, ensureAuth, requireRole("admin"), userCtrl.adminListUsers);
 router.post("/admin/users", auth, ensureAuth, requireRole("admin"), userCtrl.createStaffUser);
 
+
+// router.get('/me', userController.me);
+// router.put('/me', userController.updateMe); // Hoặc router.put('/update-profile', ...)
 module.exports = router;
