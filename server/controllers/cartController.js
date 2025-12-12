@@ -3,78 +3,45 @@ const pool = require("../config/db");
 // ============================
 // 1. Thêm vào giỏ hàng
 // ============================
-exports.addToCart = async (req, res) => {
-    try {
-        const userId = req.user?.id;
-        const { productId, quantity } = req.body;
-
-        if (!userId) {
-            return res.status(401).json({ message: "Bạn cần đăng nhập" });
-        }
-
-        const [[existing]] = await pool.execute(
-            `SELECT * FROM gio_hang WHERE nguoi_dung_id = ? AND bien_the_id = ?`,
-            [userId, productId]
-        );
-
-        if (existing) {
-            await pool.execute(
-                `UPDATE gio_hang SET so_luong = so_luong + ? WHERE id = ?`,
-                [quantity, existing.id]
-            );
-        } else {
-            await pool.execute(
-                `INSERT INTO gio_hang (nguoi_dung_id, bien_the_id, so_luong)
-                 VALUES (?, ?, ?)`,
-                [userId, productId, quantity]
-            );
-        }
-
-        res.json({ message: "Đã thêm vào giỏ hàng" });
-    } catch (error) {
-        console.error("addToCart:", error);
-        res.status(500).json({ message: "Lỗi server" });
-    }
-};
-
-
-// ============================
-// 2. Lấy giỏ hàng của user
-// ============================
-// exports.getCart = async (req, res) => {
+// exports.addToCart = async (req, res) => {
 //     try {
 //         const userId = req.user?.id;
+//         const { productId, quantity } = req.body;
 
 //         if (!userId) {
 //             return res.status(401).json({ message: "Bạn cần đăng nhập" });
 //         }
 
-//         const [rows] = await pool.execute(
-//             `
-//             SELECT 
-//                 gh.id AS cart_id,
-//                 gh.so_luong,
-//                 bt.id AS bien_the_id,
-//                 bt.ten_bien_the,
-//                 sp.id AS san_pham_id,
-//                 sp.ten_san_pham,
-//                 sp.anh_dai_dien,
-//                 COALESCE(bt.gia, sp.gia_khuyen_mai, sp.gia_goc) AS gia
-//             FROM gio_hang gh
-//             JOIN bien_the bt ON gh.bien_the_id = bt.id
-//             JOIN san_pham sp ON bt.san_pham_id = sp.id
-//             WHERE gh.nguoi_dung_id = ?
-//             `,
-//             [userId]
+//         const [[existing]] = await pool.execute(
+//             `SELECT * FROM gio_hang WHERE nguoi_dung_id = ? AND bien_the_id = ?`,
+//             [userId, productId]
 //         );
 
+//         if (existing) {
+//             await pool.execute(
+//                 `UPDATE gio_hang SET so_luong = so_luong + ? WHERE id = ?`,
+//                 [quantity, existing.id]
+//             );
+//         } else {
+//             await pool.execute(
+//                 `INSERT INTO gio_hang (nguoi_dung_id, bien_the_id, so_luong)
+//                  VALUES (?, ?, ?)`,
+//                 [userId, productId, quantity]
+//             );
+//         }
 
-//         res.json(rows);
+//         res.json({ message: "Đã thêm vào giỏ hàng" });
 //     } catch (error) {
-//         console.error("getCart:", error);
+//         console.error("addToCart:", error);
 //         res.status(500).json({ message: "Lỗi server" });
 //     }
 // };
+
+
+// ============================
+// 2. Lấy giỏ hàng của user
+// ============================
+
 exports.getCart = async (req, res) => {
     try {
         const userId = req.user?.id;
@@ -108,6 +75,57 @@ exports.getCart = async (req, res) => {
         res.status(500).json({ ok: false, message: "Lỗi server" });
     }
 };
+exports.addToCart = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        // Lấy variantId (ID biến thể) thay vì productId
+        const { variantId, quantity } = req.body; 
+
+        if (!userId) {
+            return res.status(401).json({ message: "Bạn cần đăng nhập" });
+        }
+
+        if (!variantId) {
+            return res.status(400).json({ message: "Chưa chọn phân loại sản phẩm (variantId thiếu)" });
+        }
+
+        // Kiểm tra xem biến thể này có tồn tại không (Optional - để an toàn)
+        const [[variantCheck]] = await pool.execute(
+            `SELECT id FROM bien_the WHERE id = ?`, 
+            [variantId]
+        );
+        if (!variantCheck) {
+             return res.status(404).json({ message: "Sản phẩm/Biến thể không tồn tại" });
+        }
+
+        // Kiểm tra trong giỏ hàng đã có biến thể này chưa
+        const [[existing]] = await pool.execute(
+            `SELECT * FROM gio_hang WHERE nguoi_dung_id = ? AND bien_the_id = ?`,
+            [userId, variantId]
+        );
+
+        if (existing) {
+            // Nếu có rồi thì cộng dồn số lượng
+            await pool.execute(
+                `UPDATE gio_hang SET so_luong = so_luong + ? WHERE id = ?`,
+                [quantity, existing.id]
+            );
+        } else {
+            // Nếu chưa có thì thêm mới
+            // Lưu ý: bien_the_id nhận vào variantId
+            await pool.execute(
+                `INSERT INTO gio_hang (nguoi_dung_id, bien_the_id, so_luong)
+                 VALUES (?, ?, ?)`,
+                [userId, variantId, quantity]
+            );
+        }
+
+        res.json({ ok: true, message: "Đã thêm vào giỏ hàng" });
+    } catch (error) {
+        console.error("addToCart Error:", error);
+        res.status(500).json({ ok: false, message: "Lỗi server" });
+    }
+};
 
 
 // ============================
@@ -123,39 +141,6 @@ exports.removeItem = async (req, res) => {
     }
 };
 
-// ============================
-// 4. Mua Ngay
-// ============================
-// exports.buyNow = async (req, res) => {
-//     try {
-//         const userId = req.user?.id;
-//         const { productId, quantity } = req.body;
-
-//         if (!userId) return res.status(401).json({ message: "Bạn cần đăng nhập" });
-
-//         // Tạo đơn hàng trong bảng `don_hang`
-//         await pool.execute(
-//             `INSERT INTO don_hang (nguoi_dung_id, tong_tien, trang_thai)
-//              VALUES (?, 0, 'pending')`,
-//             [userId]
-//         );
-
-//         const [[order]] = await pool.execute("SELECT LAST_INSERT_ID() AS id");
-
-//         await pool.execute(
-//             `
-//             INSERT INTO don_hang_chi_tiet (don_hang_id, san_pham_id, so_luong)
-//             VALUES (?, ?, ?)
-//             `,
-//             [order.id, productId, quantity]
-//         );
-
-//         res.json({ message: "Đã tạo đơn hàng", orderId: order.id });
-//     } catch (error) {
-//         console.error("buyNow:", error);
-//         res.status(500).json({ message: "Lỗi server" });
-//     }
-// };
 exports.buyNow = async (req, res) => {
   try {
     const userId = req.user?.id;

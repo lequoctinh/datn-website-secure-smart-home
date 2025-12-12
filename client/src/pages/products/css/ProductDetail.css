@@ -7,15 +7,24 @@
 }
 
 .pd-container {
-  width: 90%;
+  width: 100%;
   margin: auto;
-  display: grid;
-  grid-template-columns: 50% 45%;
-  gap: 50px;
-  margin-top: 30px;
   margin-bottom: 100px;
 }
+.ProductSmartLock-BannerPage img{
+    object-fit: cover;
+  
+}
 
+.pd-container-2{
+  width: 80%;
+  margin: auto;
+  display: grid;
+  grid-template-columns: 50% 47%;
+  gap: 50px;
+  margin-top: 100px;
+  margin-bottom: 100px;
+}
 /* MEDIA */
 .pd-video {
   width: 100%;
@@ -554,4 +563,136 @@
 .btn-cart i {
   font-size: 20px;
   color: #fff;
+}
+
+
+/* Container cho phần chọn màu */
+.pd-variants-section {
+    margin: 20px 0;
+}
+
+.pd-label {
+    font-weight: 600;
+    margin-right: 10px;
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.pd-variant-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* Nút chọn màu */
+.pd-variant-btn {
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: all 0.2s;
+    min-width: 60px;
+}
+
+.pd-variant-btn:hover {
+    border-color: #bdbbbb;
+}
+
+/* Trạng thái đang chọn (Active) */
+.pd-variant-btn.active {
+    border-color: #e4682e; /* Màu đỏ chủ đạo hoặc màu brand của bạn */
+    color: #fe8f35;
+    background-color: #fff5f5;
+    font-weight: bold;
+    position: relative;
+}
+
+/* (Optional) Thêm dấu check vào góc nút active */
+.pd-variant-btn.active::after {
+    content: '✔';
+     border-color:#bdbbbb;
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ee504b;
+    color: white;
+    font-size: 10px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pd-variant-stock {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+    font-style: italic;
+}
+
+
+
+
+/* ===== BREADCRUMB FIXED FULL WIDTH ===== */
+.breadcrumb-wrapper {
+
+  grid-column: 1 / -1;    
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: -40px;
+  margin-bottom: 30px;
+}
+
+.breadcrumb-box {
+  background: #ffffff;
+  width: 83%;
+  padding: 12px 24px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  border: 1px solid #e6e6e6;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+
+  font-size: 15px;
+  color: #666;
+}
+
+.breadcrumb-box a,
+.breadcrumb-box .crumb-link {
+  cursor: pointer;
+  color: #555;
+  font-weight: 500;
+  transition: color 0.2s ease-in-out;
+}
+
+.breadcrumb-box a:hover,
+.breadcrumb-box .crumb-link:hover {
+  color: #C9AC68;
+}
+
+.breadcrumb-box .current {
+  color: #C9AC68;
+  font-weight: 600;
+}
+
+.breadcrumb-box .icon {
+  font-size: 10px;
+  color: #bbb;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .breadcrumb-box {
+    width: 95%;
+    font-size: 14px;
+    padding: 10px 18px;
+  }
 }

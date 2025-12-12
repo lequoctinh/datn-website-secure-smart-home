@@ -1,42 +1,44 @@
-    import React, { useState, useEffect } from "react";
-    import { Link, useNavigate, useLocation } from "react-router-dom";
-    import { api } from "../../../lib/api";
-    import { toast } from "react-toastify";
-    import { useAuth } from "../../../context/AuthContext";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { api } from "../../../lib/api";
+import { toast } from "react-toastify";
+import { useAuth } from "../../../context/AuthContext";
 
-    function Dangnhap() {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const { refresh } = useAuth(); 
+function Dangnhap() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { refresh } = useAuth();
 
-    const [form, setForm] = useState({ email: "", password: "" });
-    const [errors, setErrors] = useState({});
-    const [submitting, setSubmitting] = useState(false);
-    const [showPw, setShowPw] = useState(false);
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [errors, setErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
+  const [showPw, setShowPw] = useState(false);
 
-    useEffect(() => {
-        const usp = new URLSearchParams(location.search);
-        if (usp.get("verified") === "1") {
-        toast.success("Email đã được xác minh, bạn có thể đăng nhập.", {
-            toastId: "verified-ok",
-        });
-        }
-    }, [location.search]);
+  // Hiển thị thông báo nếu xác thực email thành công
+  useEffect(() => {
+    const usp = new URLSearchParams(location.search);
+    if (usp.get("verified") === "1") {
+      toast.success("Email đã được xác minh, bạn có thể đăng nhập.", {
+        toastId: "verified-ok",
+      });
+    }
+  }, [location.search]);
 
-    const onChange = (e) =>
-        setForm((s) => ({ ...s, [e.target.name]: e.target.value }));
+  const onChange = (e) =>
+    setForm((s) => ({ ...s, [e.target.name]: e.target.value }));
 
-    const validate = () => {
-        const e = {};
-        if (!form.email) e.email = "Vui lòng nhập email";
-        if (!form.password) e.password = "Vui lòng nhập mật khẩu";
-        return e;
-    };
+  const validate = () => {
+    const e = {};
+    if (!form.email) e.email = "Vui lòng nhập email";
+    if (!form.password) e.password = "Vui lòng nhập mật khẩu";
+    return e;
+  };
 
-    const onSubmit = async (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     const eObj = validate();
     setErrors(eObj);
+
     if (Object.keys(eObj).length) {
       toast.error("Vui lòng điền đầy đủ thông tin.");
       return;
@@ -45,126 +47,132 @@
     try {
       setSubmitting(true);
 
-      // 1. Gọi API Login và LẤY KẾT QUẢ TRẢ VỀ (res)
-      const res = await api("/auth/login", {
+      // 1. Gọi API login
+      const loginRes = await api("/auth/login", {
         method: "POST",
         withCred: true,
         body: { email: form.email, password: form.password },
       });
 
-      // 2. QUAN TRỌNG: Lưu Token vào LocalStorage
-      // Kiểm tra xem token nằm trong res.data hay res trực tiếp tùy vào thư viện 'api' của bạn
-      // Thường là res.data.token hoặc res.data.accessToken
-      const token = res?.data?.token || res?.token || res?.data?.accessToken;
-      
-      if (token) {
-        localStorage.setItem("token", token);
-        console.log("Đã lưu Token đăng nhập:", token); // Log kiểm tra
-      } else {
-        console.warn("Đăng nhập thành công nhưng không thấy Token trả về!");
+      // 2. Lấy token (Ưu tiên lấy đúng đường dẫn data)
+      const token =
+        loginRes?.data?.data?.token ||
+        loginRes?.data?.token ||
+        loginRes?.token ||
+        loginRes?.data?.accessToken;
+
+      if (!token) {
+        throw new Error("Không tìm thấy token từ server!");
       }
 
-      // 3. Các bước tiếp theo giữ nguyên
+      // 3. Lưu token
+      localStorage.setItem("token", token);
+      console.log("Đã lưu Token đăng nhập:", token);
+
+      // 4. Refresh context và lấy thông tin user
       await refresh();
       const me = await api("/auth/me", { method: "GET", withCred: true });
       const role = me?.data?.user?.vai_tro;
 
       toast.success("Đăng nhập thành công!", { autoClose: 1200 });
 
+      // 5. Điều hướng
       if (["admin", "nhan_vien"].includes(role)) {
         navigate("/admin", { replace: true });
       } else {
         navigate("/tai-khoan", { replace: true });
       }
+
     } catch (err) {
       console.error(err);
-      toast.error(err.message || "Đăng nhập thất bại");
+      const message = err.response?.data?.message || err.message || "Đăng nhập thất bại";
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }
   };
 
+  return (
+    <div className="p-6 md:p-8">
+      <header className="mb-6">
+        <h2 className="text-2xl md:text-3xl form-title">Đăng nhập</h2>
+        <p className="mt-1 form-subtitle">Chào mừng quay lại NexaHome</p>
+      </header>
 
-
-    return (
-        <div className="p-6 md:p-8">
-        <header className="mb-6">
-            <h2 className="text-2xl md:text-3xl form-title">Đăng nhập</h2>
-            <p className="mt-1 form-subtitle">Chào mừng quay lại NexaHome</p>
-        </header>
-
-        <form onSubmit={onSubmit} noValidate className="space-y-4">
-            <div>
-            <label htmlFor="login-email" className="form-label">
-                Email
-            </label>
-            <input
-                id="login-email"
-                name="email"
-                type="email"
-                className="form-input w-full"
-                value={form.email}
-                onChange={onChange}
-                placeholder="you@example.com"
-                aria-invalid={!!errors.email}
-            />
-            {errors.email && <p className="form-error mt-1">{errors.email}</p>}
-            </div>
-
-            <div>
-            <label htmlFor="login-password" className="form-label">
-                Mật khẩu
-            </label>
-            <div className="input-with-icon">
-                <input
-                id="login-password"
-                name="password"
-                type={showPw ? "text" : "password"}
-                className="form-input w-full"
-                value={form.password}
-                onChange={onChange}
-                placeholder="••••••••"
-                aria-invalid={!!errors.password}
-                aria-label="Mật khẩu"
-                />
-                <button
-                type="button"
-                className="icon-btn"
-                onClick={() => setShowPw((s) => !s)}
-                aria-label={showPw ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
-                aria-pressed={showPw}
-                title={showPw ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
-                >
-                {showPw ? "Ẩn" : "Hiện"}
-                </button>
-            </div>
-            {errors.password && (
-                <p className="form-error mt-1">{errors.password}</p>
-            )}
-            </div>
-
-            <div className="flex items-center justify-between">
-            <label className="flex items-center gap-2">
-                <input type="checkbox" className="form-checkbox" />{" "}
-                <span>Ghi nhớ tôi</span>
-            </label>
-            <Link to="/quen-mat-khau" className="nh-link">
-                Quên mật khẩu?
-            </Link>
-            </div>
-
-            <div className="mt-3">
-            <div
-                id="googleLoginBtn"
-                style={{ display: "flex", justifyContent: "center" }}
-            />
-            </div>
-
-            <button className="btn btn-primary w-full" type="submit" disabled={submitting}>
-            {submitting ? "Đang xử lý..." : "Đăng nhập"}
-            </button>
-        </form>
+      <form onSubmit={onSubmit} noValidate className="space-y-4">
+        <div>
+          <label htmlFor="login-email" className="form-label">
+            Email
+          </label>
+          <input
+            id="login-email"
+            name="email"
+            type="email"
+            className="form-input w-full"
+            value={form.email}
+            onChange={onChange}
+            placeholder="you@example.com"
+            aria-invalid={!!errors.email}
+          />
+          {errors.email && <p className="form-error mt-1">{errors.email}</p>}
         </div>
-    );
-    }
-    export default Dangnhap;
+
+        <div>
+          <label htmlFor="login-password" className="form-label">
+            Mật khẩu
+          </label>
+          <div className="input-with-icon relative">
+            <input
+              id="login-password"
+              name="password"
+              type={showPw ? "text" : "password"}
+              className="form-input w-full"
+              value={form.password}
+              onChange={onChange}
+              placeholder="••••••••"
+              aria-invalid={!!errors.password}
+            />
+            <button
+              type="button"
+              className="icon-btn absolute right-2 top-2"
+              onClick={() => setShowPw((s) => !s)}
+              title={showPw ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+            >
+              {showPw ? "Ẩn" : "Hiện"}
+            </button>
+          </div>
+          {errors.password && (
+            <p className="form-error mt-1">{errors.password}</p>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between">
+          <label className="flex items-center gap-2">
+            <input type="checkbox" className="form-checkbox" />{" "}
+            <span>Ghi nhớ tôi</span>
+          </label>
+          <Link to="/quen-mat-khau" className="nh-link">
+            Quên mật khẩu?
+          </Link>
+        </div>
+
+        <div className="mt-3">
+          <div
+            id="googleLoginBtn"
+            style={{ display: "flex", justifyContent: "center" }}
+          />
+        </div>
+
+        <button
+          className="btn btn-primary w-full"
+          type="submit"
+          disabled={submitting}
+        >
+          {submitting ? "Đang xử lý..." : "Đăng nhập"}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+export default Dangnhap;
