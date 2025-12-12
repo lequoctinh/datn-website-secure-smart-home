@@ -57,6 +57,7 @@ app.use("/admin/categories", require("./routes/categoryRoutes"));
 app.use("/api/customers", require("./routes/customerRoutes")); // nếu có
 app.use("/api/cart", require("./routes/cartRoutes"));
 app.use("/api/orders", require("./routes/orderRoutes"));
+app.use("/api/reviews", require("./routes/reviewRoutes"));
 app.get("/debug", (req, res) => {
     res.json({
         API_BASE: process.env.API_BASE_URL,
