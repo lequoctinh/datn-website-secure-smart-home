@@ -259,7 +259,7 @@ CREATE TABLE `hinh_anh_bai_viet` (
 
 CREATE TABLE `hinh_anh_san_pham` (
   `id` bigint(20) UNSIGNED NOT NULL,
-  `san_pham_id` bigint(20) UNSIGNED NOT NULL,
+  `san_pham_id` bigint(20) UNSIGNED NOT NULL,   
   `duong_dan_anh` varchar(500) NOT NULL,
   `thu_tu` int(11) DEFAULT 0,
   `ngay_tao` datetime NOT NULL DEFAULT current_timestamp(),
@@ -349,23 +349,23 @@ INSERT INTO `nguoi_dung` (`id`, `vai_tro`, `ho_ten`, `email`, `email_da_xac_minh
 -- Table structure for table `san_pham`
 --
 
-CREATE TABLE `san_pham` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `ten_san_pham` varchar(255) NOT NULL,
-  `duong_dan_ten_seo` varchar(255) NOT NULL,
-  `anh_dai_dien` varchar(255) DEFAULT NULL,
-  `gia_goc` decimal(15,2) DEFAULT NULL,
-  `gia_khuyen_mai` decimal(15,2) DEFAULT NULL,
-  `thuong_hieu_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `danh_muc_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `nhom_so_sanh_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `mo_ta` text DEFAULT NULL,
-  `thong_so` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`thong_so`)),
-  `bao_hanh_thang` int(11) DEFAULT 12,
-  `trang_thai` enum('hien','an') DEFAULT 'hien',
-  `ngay_tao` datetime NOT NULL DEFAULT current_timestamp(),
-  `ngay_cap_nhat` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ;
+  CREATE TABLE `san_pham` (
+    `id` bigint(20) UNSIGNED NOT NULL,
+    `ten_san_pham` varchar(255) NOT NULL,
+    `duong_dan_ten_seo` varchar(255) NOT NULL,
+    `anh_dai_dien` varchar(255) DEFAULT NULL,
+    `gia_goc` decimal(15,2) DEFAULT NULL,
+    `gia_khuyen_mai` decimal(15,2) DEFAULT NULL,
+    `thuong_hieu_id` bigint(20) UNSIGNED DEFAULT NULL,
+    `danh_muc_id` bigint(20) UNSIGNED DEFAULT NULL,
+    `nhom_so_sanh_id` bigint(20) UNSIGNED DEFAULT NULL,
+    `mo_ta` text DEFAULT NULL,
+    `thong_so` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`thong_so`)),
+    `bao_hanh_thang` int(11) DEFAULT 12,
+    `trang_thai` enum('hien','an') DEFAULT 'hien',
+    `ngay_tao` datetime NOT NULL DEFAULT current_timestamp(),
+    `ngay_cap_nhat` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  ) ;
 
 --
 -- Dumping data for table `san_pham`
@@ -449,7 +449,7 @@ INSERT INTO `thuong_hieu` (`id`, `ten_thuong_hieu`, `duong_dan_ten_seo`, `ngay_t
 (14, 'KASSLER', 'kassler', '2025-11-04 13:31:32', '2025-11-04 13:31:32', '/uploads/brands/1762237892319-logo_kassler.jpg'),
 (15, 'PIMADOOR', 'pimadoor', '2025-11-04 13:32:11', '2025-11-04 13:32:11', '/uploads/brands/1762237931636-logo_pimadoor.png'),
 (16, 'TAPO', 'tapo', '2025-11-04 13:32:28', '2025-11-04 13:32:28', '/uploads/brands/1762237948144-logo_tapo.jpg');
-
+  
 -- --------------------------------------------------------
 
 --

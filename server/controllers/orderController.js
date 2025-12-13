@@ -3,8 +3,8 @@ const pool = require("../config/db");
 const crypto = require("crypto");
 
 /**
- * Helper: tạo mã đơn hàng duy nhất
- * format: DH + YYMMDD + random 6
+ * Helper: Tạo mã đơn hàng duy nhất
+ * Format: DH + YYMMDD + Random
  */
 function generateOrderCode() {
   const date = new Date();
@@ -12,31 +12,17 @@ function generateOrderCode() {
   const m = String(date.getMonth() + 1).padStart(2, "0");
   const d = String(date.getDate()).padStart(2, "0");
   const rand = crypto.randomBytes(3).toString("hex").toUpperCase();
-  return `DH${y}${m}${d}-${rand}`;
+  return `DH${y}${m}${d}${rand}`; 
 }
 
-// POST /api/orders/create
+// 1. TẠO ĐƠN HÀNG (POST /api/orders/create)
 exports.createOrder = async (req, res) => {
-  /**
-   * Expected body:
-   * {
-   *   user_id: optional,
-   *   items: [{ product_id, product_name, product_image, unit_price, quantity }],
-   *   shipping_fee,
-   *   discount,
-   *   payment_method,
-   *   note,
-   *   address: { fullname, phone, email, province, district, ward, address_line }
-   * }
-   */
   const {
     user_id = null,
+    dia_chi_id = null,
     items = [],
     shipping_fee = 0,
-    discount = 0,
-    payment_method = "COD",
-    note = "",
-    address = {}
+    discount = 0
   } = req.body;
 
   if (!items || !Array.isArray(items) || items.length === 0) {
@@ -47,85 +33,71 @@ exports.createOrder = async (req, res) => {
   try {
     await conn.beginTransaction();
 
-    // Tính tổng tiền từ items
-    let total = 0;
+    // Tính tổng tiền hàng
+    let totalItems = 0;
     for (const it of items) {
       const qty = parseInt(it.quantity) || 0;
       const price = parseFloat(it.unit_price) || 0;
-      total += qty * price;
+      totalItems += qty * price;
     }
-    total = parseFloat(total.toFixed(2));
-    const shipping = parseFloat(shipping_fee) || 0;
+
+    // Tổng tiền thanh toán
+    const ship = parseFloat(shipping_fee) || 0;
     const disc = parseFloat(discount) || 0;
-    const grandTotal = parseFloat((total + shipping - disc).toFixed(2));
+    const grandTotal = parseFloat((totalItems + ship - disc).toFixed(2));
 
-    // Tạo order
-    const order_code = generateOrderCode();
+    // Tạo mã đơn
+    const ma_don = generateOrderCode();
+
+    // INSERT vào bảng 'don_hang'
+    // Trạng thái mặc định: "dang_xu_ly"
     const insertOrderSql = `
-      INSERT INTO orders (order_code, user_id, total, shipping_fee, discount, payment_method, status, note)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO don_hang (ma_don, nguoi_dung_id, dia_chi_id, tong_tien, giam_gia, trang_thai, ngay_tao, ngay_cap_nhat)
+      VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())
     `;
-    const [orderResult] = await conn.query(insertOrderSql, [
-      order_code,
-      user_id,
-      grandTotal,
-      shipping,
-      disc,
-      payment_method,
-      "Chờ xử lý",
-      note
-    ]);
-    const orderId = orderResult.insertId;
 
-    // Thêm order_items
+    const [orderResult] = await conn.query(insertOrderSql, [
+      ma_don,
+      user_id,
+      dia_chi_id,
+      grandTotal,
+      disc,
+      "dang_xu_ly" 
+    ]);
+    const donHangId = orderResult.insertId;
+
+    // INSERT vào bảng 'don_hang_chi_tiet'
     const insertItemSql = `
-      INSERT INTO order_items (order_id, product_id, product_name, product_image, unit_price, quantity, total_price)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO don_hang_chi_tiet (don_hang_id, bien_the_id, so_luong, don_gia, ngay_tao, ngay_cap_nhat)
+      VALUES (?, ?, ?, ?, NOW(), NOW())
     `;
+
     for (const it of items) {
       const qty = parseInt(it.quantity) || 0;
       const price = parseFloat(it.unit_price) || 0;
-      const tprice = parseFloat((qty * price).toFixed(2));
+      const bienTheId = it.product_id; 
+
       await conn.query(insertItemSql, [
-        orderId,
-        it.product_id || null,
-        it.product_name || "",
-        it.product_image || null,
-        price,
+        donHangId,
+        bienTheId,
         qty,
-        tprice
+        price
       ]);
     }
-
-    // Thêm địa chỉ giao hàng
-    const add = address || {};
-    const insertAddressSql = `
-      INSERT INTO shipping_address (order_id, fullname, phone, email, province, district, ward, address_line)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-    await conn.query(insertAddressSql, [
-      orderId,
-      add.fullname || "",
-      add.phone || "",
-      add.email || "",
-      add.province || "",
-      add.district || "",
-      add.ward || "",
-      add.address_line || ""
-    ]);
 
     await conn.commit();
 
     res.status(201).json({
+      ok: true,
       message: "Tạo đơn hàng thành công",
       order: {
-        id: orderId,
-        order_code,
-        total: grandTotal,
-        payment_method,
-        status: "Chờ xử lý"
+        id: donHangId,
+        ma_don: ma_don,
+        tong_tien: grandTotal,
+        trang_thai: "dang_xu_ly"
       }
     });
+
   } catch (err) {
     await conn.rollback();
     console.error("createOrder error:", err);
@@ -135,92 +107,208 @@ exports.createOrder = async (req, res) => {
   }
 };
 
-// GET /api/orders/user/:userId  (lấy lịch sử theo user)
+// 2. LẤY DANH SÁCH ĐƠN HÀNG CỦA TÔI (GET /api/orders/my-orders)
+exports.getMyOrders = async (req, res) => {
+  try {
+    if (!req.user) return res.status(401).json({ ok: false, message: "Chưa đăng nhập" });
+    const userId = req.user.id;
+
+    const [orders] = await pool.query(
+      `SELECT id, ma_don, ngay_tao, trang_thai, tong_tien 
+       FROM don_hang 
+       WHERE nguoi_dung_id = ? 
+       ORDER BY id DESC`,
+      [userId]
+    );
+
+    if (orders.length === 0) {
+      return res.json({ ok: true, data: [] });
+    }
+
+    // Lấy chi tiết sản phẩm để hiển thị ảnh
+    const fullOrders = await Promise.all(orders.map(async (order) => {
+      const [items] = await pool.query(
+        `SELECT 
+            dhct.so_luong, 
+            dhct.don_gia, 
+            bt.ten_bien_the,
+            sp.ten_san_pham,
+            -- Cột đúng: duong_dan_anh
+            (SELECT duong_dan_anh FROM hinh_anh_san_pham ha WHERE ha.san_pham_id = sp.id LIMIT 1) as hinh_anh
+         FROM don_hang_chi_tiet dhct
+         JOIN bien_the bt ON dhct.bien_the_id = bt.id
+         JOIN san_pham sp ON bt.san_pham_id = sp.id
+         WHERE dhct.don_hang_id = ?`,
+        [order.id]
+      );
+
+      return {
+        id: order.id,
+        order_code: order.ma_don,
+        date: order.ngay_tao,
+        status: order.trang_thai,
+        total: order.tong_tien,
+        items: items.map(item => ({
+          name: item.ten_san_pham,
+          variant: item.ten_bien_the,
+          price: item.don_gia,
+          quantity: item.so_luong,
+          // Nếu database lưu đường dẫn tương đối, cần thêm domain
+          // Nếu lưu full url (http...) thì để nguyên. 
+          // Ở đây giả sử bạn lưu đường dẫn tương đối (vd: /uploads/...)
+          image: item.hinh_anh ? `http://localhost:5000${item.hinh_anh}` : "https://via.placeholder.com/150"
+        }))
+      };
+    }));
+
+    res.json({ ok: true, data: fullOrders });
+  } catch (err) {
+    console.error("getMyOrders error:", err);
+    res.status(500).json({ ok: false, message: "Lỗi server" });
+  }
+};
+
+// 3. LẤY LỊCH SỬ ĐƠN HÀNG THEO USER ID (GET /api/orders/user/:userId)
 exports.getOrdersByUser = async (req, res) => {
   const userId = req.params.userId;
   try {
-    const [rows] = await pool.query(
-      `SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC`,
+    const [orders] = await pool.query(
+      `SELECT id, ma_don, ngay_tao, trang_thai, tong_tien 
+       FROM don_hang 
+       WHERE nguoi_dung_id = ? 
+       ORDER BY id DESC`,
       [userId]
     );
-    res.json(rows);
+    res.json(orders);
   } catch (err) {
     console.error("getOrdersByUser:", err);
     res.status(500).json({ message: "Lỗi server" });
   }
 };
 
-// GET /api/orders/:id (chi tiết 1 order)
+// 4. CHI TIẾT ĐƠN HÀNG (GET /api/orders/:id)
 exports.getOrderById = async (req, res) => {
   const orderId = req.params.id;
 
   try {
     const [[order]] = await pool.query(
-      `SELECT * FROM orders WHERE id = ?`,
+      `SELECT * FROM don_hang WHERE id = ?`,
       [orderId]
     );
 
     if (!order) {
-      return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
+      return res.status(404).json({ ok: false, message: "Không tìm thấy đơn hàng" });
     }
 
     const [items] = await pool.query(
-      `SELECT * FROM order_items WHERE order_id = ?`,
+      `SELECT 
+          dhct.*,
+          bt.ten_bien_the,
+          sp.ten_san_pham,
+          -- Cột đúng: duong_dan_anh
+          (SELECT duong_dan_anh FROM hinh_anh_san_pham ha WHERE ha.san_pham_id = sp.id LIMIT 1) as hinh_anh
+       FROM don_hang_chi_tiet dhct
+       JOIN bien_the bt ON dhct.bien_the_id = bt.id
+       JOIN san_pham sp ON bt.san_pham_id = sp.id
+       WHERE dhct.don_hang_id = ?`,
       [orderId]
     );
 
-    const [[addr]] = await pool.query(
-      `SELECT * FROM shipping_address WHERE order_id = ?`,
-      [orderId]
-    );
+    let address = null;
+    if (order.dia_chi_id) {
+        const [[addr]] = await pool.query(`SELECT * FROM dia_chi WHERE id = ?`, [order.dia_chi_id]);
+        address = addr;
+    }
 
-    // TÍNH SUBTOTAL (tổng tiền hàng, chưa gồm phí ship/giảm giá)
-    let subtotal = 0;
-    items.forEach((it) => {
-      subtotal += Number(it.total_price || 0);
-    });
-
-    // TRẢ VỀ ĐÚNG ĐỊNH DẠNG FRONTEND CẦN
     res.json({
-      order: {
-        ...order,
-        subtotal,          // ⭐ thêm subtotal
-      },
-      items,
-      address: addr || null,
+      ok: true,
+      data: {
+        order: {
+           ...order,
+           order_code: order.ma_don,
+           total: order.tong_tien,
+           status: order.trang_thai
+        },
+        items,
+        address
+      }
     });
   } catch (err) {
-    console.error("getOrderById:", err);
-    res.status(500).json({ message: "Lỗi server" });
+    console.error("getOrderById error:", err);
+    res.status(500).json({ ok: false, message: "Lỗi server" });
   }
 };
 
-// PUT /api/orders/:id/status  (thay đổi trạng thái) - cho admin
+// 5. CẬP NHẬT TRẠNG THÁI (PUT /api/orders/:id/status)
 exports.updateOrderStatus = async (req, res) => {
   const orderId = req.params.id;
-  const { status } = req.body;
+  const { status } = req.body; 
   try {
-    const [result] = await pool.query(`UPDATE orders SET status = ? WHERE id = ?`, [status, orderId]);
-    if (result.affectedRows === 0) return res.status(404).json({ message: "Không tìm thấy đơn" });
-    res.json({ message: "Cập nhật trạng thái thành công" });
+    const [result] = await pool.query(
+        `UPDATE don_hang SET trang_thai = ?, ngay_cap_nhat = NOW() WHERE id = ?`, 
+        [status, orderId]
+    );
+    if (result.affectedRows === 0) return res.status(404).json({ ok: false, message: "Không tìm thấy đơn" });
+    res.json({ ok: true, message: "Cập nhật trạng thái thành công" });
   } catch (err) {
-    console.error("updateOrderStatus:", err);
-    res.status(500).json({ message: "Lỗi server" });
+    console.error("updateOrderStatus error:", err);
+    res.status(500).json({ ok: false, message: "Lỗi server" });
   }
 };
 
-// GET /api/admin/orders  (lấy tất cả đơn hàng) - cho admin
+// 6. LẤY TẤT CẢ ĐƠN HÀNG - ADMIN (GET /api/admin/orders)
 exports.getAllOrders = async (req, res) => {
   try {
     const [rows] = await pool.query(`
-      SELECT id, order_code, user_id, total, payment_method, status, created_at
-      FROM orders
-      ORDER BY created_at DESC
+      SELECT id, ma_don, nguoi_dung_id, tong_tien, giam_gia, trang_thai, ngay_tao
+      FROM don_hang
+      ORDER BY ngay_tao DESC
     `);
+    
+    const mappedRows = rows.map(r => ({
+        id: r.id,
+        order_code: r.ma_don,
+        user_id: r.nguoi_dung_id,
+        total: r.tong_tien,
+        status: r.trang_thai,
+        created_at: r.ngay_tao
+    }));
 
-    res.json(rows);
+    res.json(mappedRows);
   } catch (err) {
-    console.error("getAllOrders:", err);
-    res.status(500).json({ message: "Lỗi server" });
+    console.error("getAllOrders error:", err);
+    res.status(500).json({ ok: false, message: "Lỗi server" });
+  }
+};
+
+// 7. XÓA ĐƠN HÀNG (DELETE /api/orders/:id)
+exports.deleteOrder = async (req, res) => {
+  const orderId = req.params.id;
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+
+    // 1. Kiểm tra đơn có tồn tại không
+    const [[order]] = await conn.query("SELECT id FROM don_hang WHERE id = ?", [orderId]);
+    if (!order) {
+        await conn.release();
+        return res.status(404).json({ ok: false, message: "Đơn hàng không tồn tại" });
+    }
+
+    // 2. Xóa chi tiết đơn hàng trước
+    await conn.query("DELETE FROM don_hang_chi_tiet WHERE don_hang_id = ?", [orderId]);
+
+    // 3. Xóa đơn hàng chính
+    await conn.query("DELETE FROM don_hang WHERE id = ?", [orderId]);
+
+    await conn.commit();
+    res.json({ ok: true, message: "Đã hủy và xóa đơn hàng thành công" });
+
+  } catch (err) {
+    await conn.rollback();
+    console.error("deleteOrder error:", err);
+    res.status(500).json({ ok: false, message: "Lỗi xóa đơn hàng" });
+  } finally {
+    conn.release();
   }
 };
