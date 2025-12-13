@@ -17,6 +17,7 @@
     "aos": "^2.3.4",
     "axios": "^1.13.2",
     "framer-motion": "^12.23.12",
+    "lucide-react": "^0.561.0",
     "react": "^19.1.0",
     "react-awesome-button": "^7.0.5",
     "react-awesome-reveal": "^4.3.1",
