@@ -7,48 +7,54 @@ const CartPage = () => {
 
   // Load cart khi vào trang
   useEffect(() => {
-  const savedCart = JSON.parse(localStorage.getItem("cart")) || [];
+    const savedCart = JSON.parse(localStorage.getItem("cart")) || [];
 
-  const normalized = savedCart.map(item => ({
-    ...item,
-    price: Number(item.price) || 0,
-    qty: Number(item.qty) || 1,
-  }));
+    // Đồng bộ chuẩn: dùng quantity thay vì qty
+    const normalized = savedCart.map((item) => ({
+      ...item,
+      price: Number(item.price) || 0,
+      quantity: Number(item.quantity || item.qty || 1), // ⭐ QUAN TRỌNG
+    }));
 
-  setCart(normalized);
-}, []);
-
+    setCart(normalized);
+    localStorage.setItem("cart", JSON.stringify(normalized));
+  }, []);
 
   // Tăng / giảm số lượng
   const updateQty = (id, type) => {
-  const newCart = cart.map((item) => {
-    if (item.id === id) {
-      let newQty = Number(item.qty);
+    const newCart = cart.map((item) => {
+      if (item.id === id) {
+        let newQty = Number(item.quantity);
 
-      if (type === "increase") newQty++;
-      if (type === "decrease") newQty = newQty > 1 ? newQty - 1 : 1;
+        if (type === "increase") newQty++;
+        if (type === "decrease") newQty = newQty > 1 ? newQty - 1 : 1;
 
-      return { ...item, qty: newQty };
-    }
-    return item;
-  });
+        return { ...item, quantity: newQty };
+      }
+      return item;
+    });
 
-  setCart(newCart);
-  localStorage.setItem("cart", JSON.stringify(newCart));
-};
+    setCart(newCart);
+    localStorage.setItem("cart", JSON.stringify(newCart));
+
+    // Gửi event để Header update số lượng
+    window.dispatchEvent(new Event("cart-updated"));
+  };
 
   // Xóa sp
   const removeItem = (id) => {
     const newCart = cart.filter((item) => item.id !== id);
     setCart(newCart);
     localStorage.setItem("cart", JSON.stringify(newCart));
+    window.dispatchEvent(new Event("cart-updated"));
   };
 
   // Tổng tiền
   const subtotal = cart.reduce(
-  (sum, item) => sum + (Number(item.price) || 0) * (Number(item.qty) || 1),
-  0
-);
+    (sum, item) =>
+      sum + (Number(item.price) || 0) * (Number(item.quantity) || 1),
+    0
+  );
 
   // Nút thanh toán
   const handleCheckout = () => {
@@ -119,7 +125,7 @@ const CartPage = () => {
 
                     <input
                       type="text"
-                      value={item.qty}
+                      value={item.quantity}
                       className="w-10 text-center border-t border-b"
                       readOnly
                     />
@@ -133,7 +139,7 @@ const CartPage = () => {
                   </div>
 
                   <p className="font-semibold mt-2 text-yellow-700">
-                    {(item.price * item.qty).toLocaleString()} ₫
+                    {(item.price * item.quantity).toLocaleString()} ₫
                   </p>
                 </div>
               </div>

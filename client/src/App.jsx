@@ -18,6 +18,27 @@ import OrderDetailPage from "./pages/cart/OrderDetailPage";
 import OrderSuccess from "./pages/cart/OrderSuccess";
 import NewsDetail from "./pages/news/controller/NewsDetail";
 import ProductDetail from "./pages/products/ProductDetail";
+import BoschFingerprintLock from "./pages/products/bosch/BoschFingerprintLock";
+import HyundaiDoorLock from "./pages/products/hyundai/HyundaiDoorLock";
+import HafeleDoorLock from "./pages/products/hafele/HafeleDoorLock";
+import HubertDoorLock from "./pages/products/hubert/HubertDoorLock";
+import EzvizDoorLock from "./pages/products/ezviz/EzvizDoorLock";
+import Kassler from "./pages/products/kassler/Kassler";
+import Kaadas from "./pages/products/kaadas/Kaadas";
+import CuaPhang from "./pages/products/cuaphang/CuaPhang";
+import CuaNepKimLoai from "./pages/products/cuanepkimloai/CuaNepKimLoai";
+import CuaOKinh from "./pages/products/cuaokinh/CuaOKinh";
+import CuaChiNoi from "./pages/products/cuachinoi/CuaChiNoi";
+import CuaHutHuynh from "./pages/products/cuahuthuynh/CuaHutHuynh";
+import CuaVOM from "./pages/products/cuavom/CuaVOM";
+import CameraIMOU from "./pages/products/cameraimou/CameraIMOU";
+import CameraEZVIZ from "./pages/products/cameraezviz/CameraEZVIZ";
+import CameraDAHUA from "./pages/products/cameradahua/CameraDAHUA";
+import CameraHikvision from "./pages/products/camerahikivison/CameraHikvision";
+import CameraTapoTPLink from "./pages/products/cameratapotplink/CameraTapoTPLink";
+import CameraHanhTrinh from "./pages/products/camerahanhtrinh/CameraHanhTrinh";
+import FingerprintAccessories from "./pages/products/phukienkhoavantay/PhuKienKhoaVanTay";
+import CameraAccessories from "./pages/products/phukiencamera/PhuKienCamera"
 
 
 const AdminLayout = lazy(() => import("./admin/adminlayout/AdminLayout"));
@@ -95,6 +116,28 @@ function App() {
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/order/:id" element={<OrderDetailPage />} />
             <Route path="/order-success" element={<OrderSuccess />} />
+            <Route path="/khoa-van-tay-bosch" element={<BoschFingerprintLock />} />
+            <Route path="/khoa-cua-huyndai" element={<HyundaiDoorLock />} />
+            <Route path="/khoa-cua-hafele" element={<HafeleDoorLock />} />
+            <Route path="/khoa-cua-hubert" element={<HubertDoorLock />} />
+            <Route path="/khoa-cua-ezviz" element={<EzvizDoorLock />} />
+            <Route path="/khoa-cua-kassler" element={<Kassler />} />
+            <Route path="/khoa-cua-kaadas" element={<Kaadas />} />
+            <Route path="/cua-phang" element={<CuaPhang />} />
+            <Route path="/cua-nep-kim-loai" element={<CuaNepKimLoai />} />
+            <Route path="/cua-o-kinh" element={<CuaOKinh />} />
+            <Route path="/cua-chi-noi" element={<CuaChiNoi />} />
+            <Route path="/cua-hut-huynh" element={<CuaHutHuynh />} />
+            <Route path="/cua-vom" element={<CuaVOM />} />
+            <Route path="/camera-wifi-imou" element={<CameraIMOU />} />
+            <Route path="/camera-wifi-ezviz" element={<CameraEZVIZ />} />
+            <Route path="/camera-dahua" element={<CameraDAHUA />} />
+            <Route path="/camera-hikvision" element={<CameraHikvision />} />
+            <Route path="/camera-tapo-tp-link" element={<CameraTapoTPLink />} />
+            <Route path="/camera-hanh-trinh" element={<CameraHanhTrinh />} />
+            <Route path="/phu-kien-khoa-van-tay" element={<FingerprintAccessories />} />
+            <Route path="/phu-kien-camera" element={<CameraAccessories />} />
+
             
           </Routes>
         </Layout>
