@@ -151,9 +151,7 @@ function Dangnhap() {
             <input type="checkbox" className="form-checkbox" />{" "}
             <span>Ghi nhớ tôi</span>
           </label>
-          <Link to="/quen-mat-khau" className="nh-link">
-            Quên mật khẩu?
-          </Link>
+          <Link to="/quen-mat-khau">Quên mật khẩu?</Link>
         </div>
 
         <div className="mt-3">

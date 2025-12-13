@@ -8,6 +8,9 @@ const pool = require("../config/db");
 router.post("/register", authController.register);
 router.get("/verify-email", authController.verifyEmail);
 router.post("/login", authController.login);
+
+router.post("/forgot-password", authController.forgotPassword);
+router.post("/reset-password", authController.resetPassword);
 // router.get("/verify-email", async (req, res) => {
 //     const token = req.query.token;
 

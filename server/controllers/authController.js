@@ -15,15 +15,7 @@
     function signToken(payload) {
     return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES });
     }
-    // async function createUniqueEmailToken() {
-    // for (let i = 0; i < 5; i++) {
-    //     const t = crypto.randomBytes(32).toString("hex");
-    //     const [r] = await pool.query("SELECT id FROM nguoi_dung WHERE email_token=? LIMIT 1", [t]);
-    //     if (!r.length) return t;
-    // }
-    // throw new Error("Không thể tạo token email duy nhất");
-    // }
-
+  
     //  ĐĂNG KÝ
   async function createUniqueEmailToken() {
     for (let i = 0; i < 5; i++) {
@@ -40,61 +32,124 @@
 
     throw new Error("Không thể tạo token email duy nhất");
 }
-    // async function register(req, res) {
-    // try {
-    //     const { fullName, email, password } = req.body;
-    //     if (!fullName || !email || !password)
-    //     return res.status(400).json({ ok: false, message: "Thiếu dữ liệu" });
-    //     if (password.length < 6)
-    //     return res.status(400).json({ ok: false, message: "Mật khẩu tối thiểu 6 ký tự" });
+    async function createUniqueResetToken() {
+  for (let i = 0; i < 5; i++) {
+    const t = crypto.randomBytes(32).toString("hex");
+    const [r] = await pool.query(
+      "SELECT id FROM nguoi_dung WHERE reset_password_token=? LIMIT 1",
+      [t]
+    );
+    if (!r.length) return t;
+  }
+  throw new Error("Không thể tạo reset token");
+}
 
-    //     const [dup] = await pool.query("SELECT id FROM nguoi_dung WHERE email=? LIMIT 1", [email]);
-    //     if (dup.length) return res.status(409).json({ ok: false, message: "Email đã tồn tại" });
 
-    //     const hash = await bcrypt.hash(password, 10);
-    //     const token = await createUniqueEmailToken();
-    //     console.log("TOKEN TẠO:", token);
-    //     const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+async function forgotPassword(req, res) {
 
-    //     await pool.query(
-    //     `INSERT INTO nguoi_dung
-    //     (vai_tro, ho_ten, email, mat_khau_hash, trang_thai, email_da_xac_minh,
-    //         email_token, email_token_het_han, email_xac_minh_luc)
-    //     VALUES ('customer', ?, ?, ?, 'pending', 0, ?, ?, NULL)`,
-    //     [fullName, email, hash, token, expires]
-    //     );
+console.log("🔥 FORGOT PASSWORD API HIT");
+  try {
+    const { email } = req.body;
+    if (!email)
+      return res.status(400).json({ ok: false, message: "Thiếu email" });
 
-    //        try {
-    //         const [checkRows] = await pool.query(
-    //             "SELECT email_token FROM nguoi_dung WHERE email = ? LIMIT 1",
-    //             [email]
-    //         );
-    //         if (checkRows && checkRows.length) {
-    //             console.log("TOKEN LƯU DB:", checkRows[0].email_token);
-    //         } else {
-    //             console.log("TOKEN LƯU DB: Không tìm thấy user sau khi INSERT");
-    //         }
-    //     } catch (e) {
-    //         console.error("Lỗi khi kiểm tra token trong DB:", e);
-    //     }
+    const [rows] = await pool.query(
+      "SELECT id, mat_khau_hash FROM nguoi_dung WHERE email=? LIMIT 1",
+      [email]
+    );
 
-    //     const verifyUrl = `${API_BASE}/auth/verify-email?token=${token}`;
-    //     await sendVerifyEmail(email, verifyUrl);
-    //         const [check] = await pool.query(
-    //         "SELECT email_token FROM nguoi_dung WHERE email=? LIMIT 1",
-    //         [email]
-    //     );
-    //     console.log("TOKEN THẬT TRONG DB:", check[0].email_token);
-    //     console.log("TOKEN GỬI EMAIL:", token);
-    //     return res.status(201).json({
-    //     ok: true,
-    //     message: "Đăng ký thành công. Vui lòng kiểm tra email để xác minh tài khoản.",
-    //     });
-    // } catch (err) {
-    //     console.error(err);
-    //     return res.status(500).json({ ok: false, message: "Lỗi máy chủ" });
-    // }
-    // }
+    // Không tiết lộ email có tồn tại hay không
+    if (!rows.length) {
+      return res.json({
+        ok: true,
+        message: "Nếu email tồn tại, link đặt lại mật khẩu đã được gửi",
+      });
+    }
+
+    const user = rows[0];
+
+    // Google-only account
+    if (!user.mat_khau_hash) {
+      return res.status(400).json({
+        ok: false,
+        message: "Tài khoản này đăng nhập bằng Google, không thể đặt lại mật khẩu",
+      });
+    }
+
+    const token = await createUniqueResetToken();
+    const expires = new Date(Date.now() + 30 * 60 * 1000); // 30 phút
+
+    await pool.query(
+      `UPDATE nguoi_dung
+       SET reset_password_token=?, reset_password_expires=?
+       WHERE id=?`,
+      [token, expires, user.id]
+    );
+
+    const resetUrl = `${WEB_BASE}/dat-lai-mat-khau?token=${token}`;
+    await sendVerifyEmail(email, resetUrl); // bạn có thể đổi tên mailer sau
+
+    return res.json({
+      ok: true,
+      message: "Nếu email tồn tại, link đặt lại mật khẩu đã được gửi",
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ ok: false, message: "Lỗi máy chủ" });
+  }
+}
+
+
+async function resetPassword(req, res) {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword)
+      return res.status(400).json({ ok: false, message: "Thiếu dữ liệu" });
+
+    if (newPassword.length < 6)
+      return res.status(400).json({ ok: false, message: "Mật khẩu tối thiểu 6 ký tự" });
+
+    const [rows] = await pool.query(
+      `SELECT id, reset_password_expires
+       FROM nguoi_dung
+       WHERE reset_password_token=? LIMIT 1`,
+      [token]
+    );
+
+    if (!rows.length)
+      return res.status(400).json({ ok: false, message: "Token không hợp lệ" });
+
+    const user = rows[0];
+
+    if (
+      user.reset_password_expires &&
+      new Date(user.reset_password_expires).getTime() < Date.now()
+    ) {
+      return res.status(400).json({ ok: false, message: "Token đã hết hạn" });
+    }
+
+    const hash = await bcrypt.hash(newPassword, 10);
+
+    await pool.query(
+      `UPDATE nguoi_dung
+       SET mat_khau_hash=?,
+           reset_password_token=NULL,
+           reset_password_expires=NULL
+       WHERE id=?`,
+      [hash, user.id]
+    );
+
+    return res.json({
+      ok: true,
+      message: "Đặt lại mật khẩu thành công. Vui lòng đăng nhập lại.",
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ ok: false, message: "Lỗi máy chủ" });
+  }
+}
+
 
     //XÁC MINH EMAIL 
    async function register(req, res) {
@@ -385,4 +440,7 @@
     googleLogin,
     me,
     logout,
+    forgotPassword,
+    resetPassword,
+
     };

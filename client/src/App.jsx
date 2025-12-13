@@ -39,7 +39,9 @@ import CameraTapoTPLink from "./pages/products/cameratapotplink/CameraTapoTPLink
 import CameraHanhTrinh from "./pages/products/camerahanhtrinh/CameraHanhTrinh";
 import FingerprintAccessories from "./pages/products/phukienkhoavantay/PhuKienKhoaVanTay";
 import CameraAccessories from "./pages/products/phukiencamera/PhuKienCamera";
-import SearchPage from "./pages/seach/SearchPage"
+import SearchPage from "./pages/seach/SearchPage";
+import QuenMatKhau from "./pages/auth/components/QuenMatKhau";
+import DatLaiMatKhau from "./pages/auth/components/DatLaiMatKhau";
     
 
 
@@ -140,6 +142,8 @@ import SearchPage from "./pages/seach/SearchPage"
             <Route path="/phu-kien-khoa-van-tay" element={<FingerprintAccessories />} />
             <Route path="/phu-kien-camera" element={<CameraAccessories />} />
             <Route path="/tim-kiem" element={<SearchPage />} />
+            <Route path="/quen-mat-khau" element={<QuenMatKhau />} />
+            <Route path="/dat-lai-mat-khau" element={<DatLaiMatKhau />} />
             
           </Routes>
         </Layout>

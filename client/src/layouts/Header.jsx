@@ -115,7 +115,7 @@ function Header() {
                                         </div>
                                         <ul className="py-1">
                                             <li><Link className="block px-4 py-2 hover:bg-gray-100" to="/tai-khoan">Hồ sơ cá nhân</Link></li>
-                                            <li><Link className="block px-4 py-2 hover:bg-gray-100" to="/don-hang">Lịch sử đơn hàng</Link></li>
+                                            {/* <li><Link className="block px-4 py-2 hover:bg-gray-100" to="/tai-khoan">Lịch sử đơn hàng</Link></li> */}
                                             <li>
                                             <button className="w-full text-left px-4 py-2 hover:bg-gray-100" onClick={async () => {
                                                 try {
