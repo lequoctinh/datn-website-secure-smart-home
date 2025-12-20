@@ -7,6 +7,7 @@ import './css/Taikhoan.css';
 import { 
   User, FileText, Settings, LogOut, Camera, Save, Truck, Search, Trash2
 } from 'lucide-react';
+import { MapPin, Plus, Edit2, CheckCircle } from 'lucide-react';
 
 const TaiKhoan = () => {
   const [activeTab, setActiveTab] = useState('orders'); // Mặc định vào tab Đơn hàng
@@ -20,8 +21,127 @@ const TaiKhoan = () => {
   // State form Profile
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
   const [formData, setFormData] = useState({
-    ho_ten: '', so_dien_thoai: '', email: '', ngay_sinh: '', gioi_tinh: 'khac'
+    ho_ten: '', 
+    sdt: '', 
+    email: '', 
+    ngay_sinh: '', 
+    gioi_tinh: 'khac'
   });
+  // --- ADDRESS STATE ---
+const [addresses, setAddresses] = useState([]);
+const [loadingAddress, setLoadingAddress] = useState(false);
+const [showAddressForm, setShowAddressForm] = useState(false);
+const [editingAddress, setEditingAddress] = useState(null);
+
+const emptyAddress = {
+  ho_ten: '',
+  sdt: '',
+  tinh_thanh: '',
+  quan_huyen: '',
+  phuong_xa: '',
+  dia_chi: '',
+  ghi_chu: '',
+  mac_dinh: false
+};
+
+const [addressForm, setAddressForm] = useState(emptyAddress);
+
+
+const fetchAddresses = async () => {
+  setLoadingAddress(true);
+  try {
+    const res = await axios.get(
+      'http://localhost:5000/address/addresses',
+      { withCredentials: true }
+    );
+    if (res.data.ok) {
+      setAddresses(res.data.data.addresses);
+    }
+  } catch (e) {
+    toast.error("Không tải được danh sách địa chỉ");
+  } finally {
+    setLoadingAddress(false);
+  }
+};
+
+  useEffect(() => {
+  if (activeTab === 'addresses') {
+    fetchAddresses();
+  }
+}, [activeTab]);
+
+
+const handleAddressChange = (e) => {
+  const { name, value, type, checked } = e.target;
+  setAddressForm(prev => ({
+    ...prev,
+    [name]: type === 'checkbox' ? checked : value
+  }));
+};
+
+
+const submitAddress = async () => {
+  try {
+    if (editingAddress) {
+      await axios.put(
+        `http://localhost:5000/address/addresses/${editingAddress.id}`,
+        addressForm,
+        { withCredentials: true }
+      );
+      toast.success("Đã cập nhật địa chỉ");
+    } else {
+      await axios.post(
+        `http://localhost:5000/address/addresses`,
+        addressForm,
+        { withCredentials: true }
+      );
+      toast.success("Đã thêm địa chỉ");
+    }
+    setShowAddressForm(false);
+    fetchAddresses();
+  } catch {
+    toast.error("Lỗi khi lưu địa chỉ");
+  }
+};
+
+
+const handleEditAddress = (addr) => {
+  setEditingAddress(addr);
+  setAddressForm({
+    ho_ten: addr.ho_ten,
+    sdt: addr.sdt,
+    tinh_thanh: addr.tinh_thanh,
+    quan_huyen: addr.quan_huyen,
+    phuong_xa: addr.phuong_xa,
+    dia_chi: addr.dia_chi,
+    ghi_chu: addr.ghi_chu || '',
+    mac_dinh: !!addr.mac_dinh
+  });
+  setShowAddressForm(true);
+};
+
+
+const setDefaultAddress = async (id) => {
+  await axios.patch(
+    `http://localhost:5000/address/addresses/${id}/default`,
+    {},
+    { withCredentials: true }
+  );
+  fetchAddresses();
+};
+
+
+const deleteAddress = async (id) => {
+  if (!window.confirm("Xoá địa chỉ này?")) return;
+  await axios.delete(
+    `http://localhost:5000/address/addresses/${id}`,
+    { withCredentials: true }
+  );
+  fetchAddresses();
+};
+
+
+
 
   // --- 1. LOAD DATA KHI VÀO TRANG ---
   useEffect(() => {
@@ -29,7 +149,7 @@ const TaiKhoan = () => {
       // Set dữ liệu Profile
       setFormData({
         ho_ten: me.ho_ten || '',
-        so_dien_thoai: me.so_dien_thoai || me.sdt || '',
+        sdt: me.sdt || me.sdt || '',
         email: me.email || '',
         ngay_sinh: me.ngay_sinh ? new Date(me.ngay_sinh).toISOString().split('T')[0] : '',
         gioi_tinh: me.gioi_tinh || 'khac'
@@ -99,7 +219,7 @@ const TaiKhoan = () => {
     e.preventDefault();
     setIsLoadingProfile(true);
     try {
-      const res = await axios.put('http://localhost:5000/api/users/me', formData, { withCredentials: true });
+      const res = await axios.put('http://localhost:5000/users/me', formData, { withCredentials: true });
       if (res.data.ok) toast.success("Cập nhật hồ sơ thành công!");
       else toast.error(res.data.message);
     } catch (error) {
@@ -152,13 +272,17 @@ const TaiKhoan = () => {
         return <span className="order-status">{status}</span>;
     }
   };
+  
 
   // Danh sách Menu
   const menuItems = [
     { id: 'profile', label: 'Hồ sơ của tôi', icon: <User size={18} /> },
     { id: 'orders', label: 'Danh sách đơn hàng', icon: <FileText size={18} /> },
+    { id: 'addresses', label: 'Quản lý địa chỉ', icon: <MapPin size={18} /> },
     { id: 'settings', label: 'Cài đặt', icon: <Settings size={18} /> },
   ];
+  // Danh sách Menu
+  
 
   if (!me) return <div className="loading-screen">Đang tải thông tin...</div>;
 const avatarSrc = "/img/avatar.webp";
@@ -205,9 +329,55 @@ const avatarSrc = "/img/avatar.webp";
                 <form className="profile-form" onSubmit={handleUpdateProfile}>
                    <div className="form-grid">
                       <div className="form-group"><label>Họ tên</label><input className="form-input" name="ho_ten" value={formData.ho_ten} onChange={handleInputChange}/></div>
-                      <div className="form-group"><label>Số điện thoại</label><input className="form-input" name="so_dien_thoai" value={formData.so_dien_thoai} onChange={handleInputChange}/></div>
+                      <div className="form-group"><label>Số điện thoại</label><input className="form-input" name="sdt" value={formData.sdt} onChange={handleInputChange}/></div>
                       <div className="form-group"><label>Email</label><input className="form-input disabled" value={formData.email} disabled/></div>
                       <div className="form-group"><label>Ngày sinh</label><input type="date" className="form-input" name="ngay_sinh" value={formData.ngay_sinh} onChange={handleInputChange}/></div>
+                      {/* <div className="form-group">
+                        <label>Giới tính</label>
+                        <select className="form-input" name="gioi_tinh" value={formData.gioi_tinh} onChange={handleInputChange}>
+                          <option value="nam">Nam</option>
+                          <option value="nu">Nữ</option>
+                          <option value="khac">Khác</option>
+                        </select>
+                      </div> */}
+                      <div className="form-group">
+                        <label>Giới tính</label>
+                        <div className="gender-group">
+                          <label className={`gender-item ${formData.gioi_tinh === 'nam' ? 'active' : ''}`}>
+                            <input
+                              type="radio"
+                              name="gioi_tinh"
+                              value="nam"
+                              checked={formData.gioi_tinh === 'nam'}
+                              onChange={handleInputChange}
+                            />
+                            <span> Nam</span>
+                          </label>
+
+                          <label className={`gender-item ${formData.gioi_tinh === 'nu' ? 'active' : ''}`}>
+                            <input
+                              type="radio"
+                              name="gioi_tinh"
+                              value="nu"
+                              checked={formData.gioi_tinh === 'nu'}
+                              onChange={handleInputChange}
+                            />
+                            <span> Nữ</span>
+                          </label>
+
+                          <label className={`gender-item ${formData.gioi_tinh === 'khac' ? 'active' : ''}`}>
+                            <input
+                              type="radio"
+                              name="gioi_tinh"
+                              value="khac"
+                              checked={formData.gioi_tinh === 'khac'}
+                              onChange={handleInputChange}
+                            />
+                            <span>Khác</span>
+                          </label>
+                        </div>
+                      </div>
+
                    </div>
                    <button type="submit" className="save-btn" disabled={isLoadingProfile}><Save size={18}/> Lưu thay đổi</button>
                 </form>
@@ -305,6 +475,164 @@ const avatarSrc = "/img/avatar.webp";
                 )}
               </div>
             )}
+             {/* --- TAB DANH SÁCH ĐỊA CHỈ--- */}
+
+            {activeTab === 'addresses' && (
+              <div className="fade-in">
+                <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                  <h2 className="section-title">Địa chỉ của tôi</h2>
+                  <button
+                    className="save-btn"
+                    onClick={() => {
+                      setEditingAddress(null);
+                      setAddressForm(emptyAddress);
+                      setShowAddressForm(true);
+                    }}
+                  >
+                    <Plus size={18}/> Thêm địa chỉ
+                  </button>
+                </div>
+
+                {showAddressForm && (
+                  <div className="address-modal">
+                    <div className="address-modal-card">
+                      <h3>
+                        {editingAddress ? 'Cập nhật địa chỉ' : 'Thêm địa chỉ mới'}
+                      </h3>
+
+                      <div className="form-group">
+                        <label>Họ tên *</label>
+                        <input
+                          className='form-input-address'
+                          name="ho_ten"
+                          value={addressForm.ho_ten}
+                          onChange={handleAddressChange}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>Số điện thoại *</label>
+                        <input
+                          className='form-input-address'
+                          name="sdt"
+                          value={addressForm.sdt}
+                          onChange={handleAddressChange}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>Tỉnh / Thành phố *</label>
+                        <input
+                          className='form-input-address'
+                          name="tinh_thanh"
+                          value={addressForm.tinh_thanh}
+                          onChange={handleAddressChange}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>Quận / Huyện *</label>
+                        <input
+                          className='form-input-address'
+                          name="quan_huyen"
+                          value={addressForm.quan_huyen}
+                          onChange={handleAddressChange}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>Phường / Xã *</label>
+                        <input
+                          className='form-input-address'
+                          name="phuong_xa"
+                          value={addressForm.phuong_xa}
+                          onChange={handleAddressChange}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>Địa chỉ cụ thể *</label>
+                        <input
+                          className='form-input-address'
+                          name="dia_chi"
+                          value={addressForm.dia_chi}
+                          onChange={handleAddressChange}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>Ghi chú</label>
+                        <textarea
+                          className='form-input-address'
+                          name="ghi_chu"
+                          value={addressForm.ghi_chu}
+                          onChange={handleAddressChange}
+                        />
+                      </div>
+
+                      <label className="checkbox-row">
+                        <input
+                          type="checkbox"
+                          name="mac_dinh"
+                          checked={addressForm.mac_dinh}
+                          onChange={handleAddressChange}
+                        />
+                        Đặt làm địa chỉ mặc định
+                      </label>
+
+                      <div className="modal-actions">
+                        <button className="save-btn" onClick={submitAddress}>
+                          {editingAddress ? 'Cập nhật' : 'Thêm mới'}
+                        </button>
+                        <button
+                          className="cancel-btn"
+                          onClick={() => setShowAddressForm(false)}
+                        >
+                          Huỷ
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {loadingAddress ? (
+                  <p>Đang tải địa chỉ...</p>
+                ) : addresses.length === 0 ? (
+                  <p style={{color:'#666'}}>Bạn chưa có địa chỉ nào.</p>
+                ) : (
+                  <div className="address-list">
+                    {addresses.map(addr => (
+                      <div key={addr.id} className={`address-card ${addr.mac_dinh ? 'default' : ''}`}>
+                        <div className="address-header">
+                          <strong>{addr.ho_ten}</strong>
+                          {addr.mac_dinh && <span className="badge">Mặc định</span>}
+                        </div>
+
+                        <p>{addr.sdt}</p>
+                        <p>
+                          {addr.dia_chi}, {addr.phuong_xa}, {addr.quan_huyen}, {addr.tinh_thanh}
+                        </p>
+
+                        <div className="address-actions">
+                          {!addr.mac_dinh && (
+                            <button onClick={() => setDefaultAddress(addr.id)}>
+                              <CheckCircle size={14}/> Đặt mặc định
+                            </button>
+                          )}
+                          <button onClick={() => handleEditAddress(addr)}>
+                            <Edit2 size={14}/> Sửa
+                          </button>
+                          <button className="danger" onClick={() => deleteAddress(addr.id)}>
+                            <Trash2 size={14}/> Xoá
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             
             {activeTab === 'settings' && <div>Chức năng đang cập nhật...</div>}
           </main>

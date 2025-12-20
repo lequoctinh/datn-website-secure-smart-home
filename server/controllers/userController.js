@@ -126,7 +126,7 @@ try {
 }
 function genStrongPassword() {
     const U="ABCDEFGHJKLMNPQRSTUVWXYZ", L="abcdefghijkmnpqrstuvwxyz",
-            D="23456789", S="@#$%&*+-_";
+            d="23456789", S="@#$%&*+-_";
     const A=U+L+D+S;
     const pick = s => s[Math.floor(Math.random()*s.length)];
     let x = pick(U)+pick(L)+pick(D)+pick(S);

@@ -4,6 +4,7 @@
     const pool = require("../config/db");
     const { sendVerifyEmail } = require("../utils/mailer");
     const { OAuth2Client } = require("google-auth-library");
+    const sendResetPasswordEmail = require("../utils/sendResetPasswordEmail");
 
     const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
     const JWT_SECRET = process.env.JWT_SECRET || "dev_secret";
@@ -14,6 +15,7 @@
     const REQUIRE_G_VERIFY = String(process.env.REQUIRE_EMAIL_VERIFY_FOR_GOOGLE || "false") === "true";
     function signToken(payload) {
     return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES });
+  
     }
   
     //  ĐĂNG KÝ
@@ -45,59 +47,69 @@
 }
 
 
-async function forgotPassword(req, res) {
+  async function forgotPassword(req, res) {
 
-console.log("🔥 FORGOT PASSWORD API HIT");
-  try {
-    const { email } = req.body;
-    if (!email)
-      return res.status(400).json({ ok: false, message: "Thiếu email" });
+  console.log("🔥 FORGOT PASSWORD API HIT");
 
-    const [rows] = await pool.query(
-      "SELECT id, mat_khau_hash FROM nguoi_dung WHERE email=? LIMIT 1",
-      [email]
-    );
+    try {
+      const { email } = req.body;
+      if (!email)
+        return res.status(400).json({ ok: false, message: "Thiếu email" });
 
-    // Không tiết lộ email có tồn tại hay không
-    if (!rows.length) {
+      const [rows] = await pool.query(
+        "SELECT id, mat_khau_hash FROM nguoi_dung WHERE email=? LIMIT 1",
+        [email]
+      );
+  console.log("🔥 FORGOT PASSWORD HIT", req.body);
+      // Không tiết lộ email có tồn tại hay không
+      if (!rows.length) {
+        return res.json({
+          ok: true,
+          message: "Nếu email tồn tại, link đặt lại mật khẩu đã được gửi",
+        });
+      }
+
+      const user = rows[0];
+
+      // Google-only account
+      if (!user.mat_khau_hash) {
+        return res.status(400).json({
+          ok: false,
+          message: "Tài khoản này đăng nhập bằng Google, không thể đặt lại mật khẩu",
+        });
+      }
+
+      const token = await createUniqueResetToken();
+      const expires = new Date(Date.now() + 30 * 60 * 1000); // 30 phút
+
+      await pool.query(
+        `UPDATE nguoi_dung
+        SET reset_password_token=?, reset_password_expires=?
+        WHERE id=?`,
+        [token, expires, user.id]
+      );
+
+      // const resetUrl = `${WEB_BASE}/dat-lai-mat-khau?token=${token}`;
+      // await sendVerifyEmail(email, resetUrl); // bạn có thể đổi tên mailer sau
+
+      const resetUrl = `${WEB_BASE}/dat-lai-mat-khau?token=${token}`;
+
+      // DEBUG trước
+      console.log("RESET PASSWORD URL:", resetUrl);
+
+      // Gửi mail
+      await sendResetPasswordEmail(email, resetUrl);
+
+
       return res.json({
         ok: true,
         message: "Nếu email tồn tại, link đặt lại mật khẩu đã được gửi",
       });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ ok: false, message: "Lỗi máy chủ" });
     }
-
-    const user = rows[0];
-
-    // Google-only account
-    if (!user.mat_khau_hash) {
-      return res.status(400).json({
-        ok: false,
-        message: "Tài khoản này đăng nhập bằng Google, không thể đặt lại mật khẩu",
-      });
-    }
-
-    const token = await createUniqueResetToken();
-    const expires = new Date(Date.now() + 30 * 60 * 1000); // 30 phút
-
-    await pool.query(
-      `UPDATE nguoi_dung
-       SET reset_password_token=?, reset_password_expires=?
-       WHERE id=?`,
-      [token, expires, user.id]
-    );
-
-    const resetUrl = `${WEB_BASE}/dat-lai-mat-khau?token=${token}`;
-    await sendVerifyEmail(email, resetUrl); // bạn có thể đổi tên mailer sau
-
-    return res.json({
-      ok: true,
-      message: "Nếu email tồn tại, link đặt lại mật khẩu đã được gửi",
-    });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ ok: false, message: "Lỗi máy chủ" });
   }
-}
 
 
 async function resetPassword(req, res) {

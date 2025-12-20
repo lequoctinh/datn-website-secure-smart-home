@@ -56,6 +56,14 @@ function IconOrders() {
     </svg>
   );
 }
+function IconNews() {
+  return (
+    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor"strokeWidth="2">
+      <path d="M4 4h16v16H4z" />
+      <path d="M8 8h8M8 12h8M8 16h5" />
+    </svg>
+  );
+}
 function Sidebar({ open, onToggle }) {
     const navigate = useNavigate();
 
@@ -120,6 +128,10 @@ return (
         <NavLink to="/admin/products" className={itemCls}>
             <IconProducts />
             {open && <span>Sản phẩm</span>}
+        </NavLink>
+        <NavLink to="/admin/news" className={itemCls}>
+            <IconNews />
+            {open && <span>Tin tức</span>}
         </NavLink>
         <NavLink to="/admin/orders" className={itemCls}>
             <IconOrders />

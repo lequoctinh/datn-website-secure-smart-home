@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const auth = require("../middlewares/auth");
 const orderController = require("../controllers/orderController");
 
 // ✅ Đảm bảo đường dẫn đúng thư mục 'middlewares' và file 'authMiddleware'
@@ -13,6 +14,8 @@ router.post("/create", orderController.createOrder); // Tạo đơn (thường k
 router.get("/my-orders", protect, orderController.getMyOrders); // Lấy đơn của tôi (CẦN protect)
 router.get("/user/:userId", protect, orderController.getOrdersByUser);
 router.get("/:id", protect, orderController.getOrderById);
+router.post("/checkout", auth, orderController.checkout);
+
 
 // Admin routes
 router.get("/admin/orders", protect, orderController.getAllOrders);

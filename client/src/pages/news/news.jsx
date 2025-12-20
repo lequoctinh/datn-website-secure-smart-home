@@ -7,7 +7,7 @@ import "./css/news.css";
 function News() {
   const [newsList, setNewsList] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const postsPerPage = 6; // Số bài trên 1 trang
+  const postsPerPage = 7; // Số bài trên 1 trang
  
 
    //Lấy 3 bài viết mới nhất ngay sau khi có newsList
@@ -24,11 +24,15 @@ function News() {
         setNewsList(Array.isArray(data.data) ? data.data : []);
       });
   }, []);
+  
 
   // ---------------- PAGINATION ----------------
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
   const currentPosts = newsList.slice(indexOfFirstPost, indexOfLastPost);
+
+  const featuredPost = currentPosts.length > 0 ? currentPosts[0] : null;
+  const otherPosts = currentPosts.slice(1);
 
   const totalPages = Math.ceil(newsList.length / postsPerPage);
 
@@ -47,8 +51,8 @@ function News() {
       </div>
 
       {/* Breadcrumb */}
-      <div className="ProductSmartLock-Content">
-        <nav className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base">
+      <div className="ProductSmartLock-Content md:mx-5 sm:mx-5 max-sm:mx-3 lg:mx-auto">
+        <nav className="flex items-center gap-2 sm:gap-3  text-sm sm:text-base">
           <Link to="/" className="PSL-crumb"><span>Trang Chủ</span></Link>
           <FontAwesomeIcon icon={faAngleRight} className="PSL-sep" />
           <Link to="/tin-tuc" className="PSL-crumb PSL-crumb-active"><span>Tin Tức</span></Link>
@@ -61,9 +65,48 @@ function News() {
           <section className="News-Main">
             <h1>Tin tức & Bài viết mới nhất</h1>
 
-            <div className="News-Grid">
-              {currentPosts.map((item) => (
-                <article key={item.id} className="News-Card">
+            {/* FEATURED POST */}
+            {featuredPost && (
+              <article className="News-Featured modern">
+                <div className="Featured-Image">
+                  <img src={featuredPost.anh_dai_dien} alt={featuredPost.tieu_de} />
+                </div>
+
+                <div className="Featured-Body">
+                  <span className="Featured-Category">Tin nổi bật</span>
+
+                  <h2>
+                    <Link to={`/tin-tuc/${featuredPost.duong_dan_ten_seo}`}>
+                      {featuredPost.tieu_de}
+                    </Link>
+                  </h2>
+
+                  <div className="News-Meta">
+                    <span>
+                      <FontAwesomeIcon icon={faCalendarDays} />{" "}
+                      {new Date(featuredPost.ngay_tao).toLocaleDateString("vi-VN")}
+                    </span>
+                    <span>
+                      <FontAwesomeIcon icon={faUser} /> Admin
+                    </span>
+                  </div>
+
+                  <p>{featuredPost.tom_tat}</p>
+
+                  <Link
+                    to={`/tin-tuc/${featuredPost.duong_dan_ten_seo}`}
+                    className="Featured-ReadMore"
+                  >
+                    Đọc bài viết →
+                  </Link>
+                </div>
+              </article>
+            )}
+
+            {/* GRID POSTS */}
+            <div className="News-Grid modern">
+              {otherPosts.map((item) => (
+                <article key={item.id} className="News-Card modern">
                   <div className="News-Image">
                     <img src={item.anh_dai_dien} alt={item.tieu_de} />
                   </div>
@@ -75,7 +118,6 @@ function News() {
                       </Link>
                     </h2>
 
-                    {/* Meta */}
                     <div className="News-Meta">
                       <span>
                         <FontAwesomeIcon icon={faCalendarDays} />{" "}
@@ -127,8 +169,9 @@ function News() {
             </div>
           </section>
 
+
           {/* Sidebar */}
-          <aside className="News-Sidebar">
+          {/* <aside className="News-Sidebar">
             <div className="Sidebar-Box">
               <h3>Bài viết nổi bật</h3>
                 <ul>
@@ -150,7 +193,7 @@ function News() {
                 <button type="submit">Đăng ký</button>
               </form>
             </div>
-          </aside>
+          </aside> */}
         </div>
       </div>
 

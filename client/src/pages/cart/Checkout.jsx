@@ -29,6 +29,8 @@ export default function Checkout() {
     setItems(cart);
   }, []);
 
+  
+
   // Tính tạm tính
   const subtotal = items.reduce(
     (sum, it) => sum + Number(it.price || it.unit_price || 0) * Number(it.quantity || 1),
@@ -93,6 +95,7 @@ export default function Checkout() {
       alert("Lỗi kết nối server");
     }
   };
+  
 
   return (
     <div className="w-full bg-gray-100 py-10">

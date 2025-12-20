@@ -118,35 +118,37 @@ const ProductDetail = () => {
   };
 
   // Buy now
-  const handleBuyNow = async () => {
-    if (variants.length > 0 && !selectedVariant) {
-      toast.error("Vui lòng chọn màu sắc sản phẩm!");
-      return;
-    }
+  
+  const handleBuyNow = () => {
+  // check đăng nhập
+  const token = localStorage.getItem("token");
+  if (!token) {
+    toast.warning("Vui lòng đăng nhập để mua hàng");
+    navigate("/dang-nhap", {
+      state: { redirect: `/san-pham/${slug}` },
+    });
+    return;
+  }
 
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/cart/buy-now`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          productId: product.id,
-          quantity,
-          variantId: selectedVariant ? selectedVariant.id : null,
-        }),
-      });
-      const data = await res.json();
-      if (data.ok) {
-        toast.success("Đặt hàng thành công!");
-        setTimeout(() => navigate(`/checkout/${data.orderId}`), 1200);
-      } else {
-        toast.error(data.message || "Đặt hàng thất bại!");
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Lỗi khi đặt hàng");
-    }
+ //  check biến thể
+  if (variants.length > 0 && !selectedVariant) {
+    toast.error("Vui lòng chọn màu sắc sản phẩm!");
+    return;
+  }
+
+  //3. lưu thông tin mua ngay
+  const buyNowData = {
+    productId: product.id,
+    variantId: selectedVariant?.id || null,
+    quantity,
   };
+
+  localStorage.setItem("buy_now", JSON.stringify(buyNowData));
+
+  // 4. chuyển sang trang thanh toán
+  navigate("/checkout");
+};
+
 
   // Reviews: load for a productId
   const loadReviews = async (productId) => {
@@ -249,7 +251,7 @@ const submitReview = async () => {
   return (
     <div className="pd-container">
       {/* ... Breadcrumb giữ nguyên ... */}
-      <div className="container col-span-full">
+      <div className="container p-0 col-span-full">
         <div className="ProductSmartLock-BannerPage">
                   <img src="/productpage/banner-page/banner-pages.png" alt="" />
               </div>
@@ -517,32 +519,28 @@ const submitReview = async () => {
 
 <div className="related-grid">
   {related.map((p) => (
-    <div key={p.id} className="related-card">
-      <a href={`/san-pham/${p.duong_dan_ten_seo}`}>
-        <div className="related-img-wrapper">
-          <img
-            src={getImageUrl(p.anh_dai_dien)}
-            alt={p.ten_san_pham}
-          />
-        </div>
-      </a>
-
-      <p className="related-name">{p.ten_san_pham}</p>
-
-      <div className="related-price">
-        <del>{Number(p.gia_goc).toLocaleString("vi-VN")} đ</del>
-        <span className="new-price">
-          {Number(p.gia_khuyen_mai).toLocaleString("vi-VN")} đ
-        </span>
-      </div>
-
-      <div className="related-btn-box">
-        <button className="btn-compare">So sánh</button>
-        <button type="button" className="SLP-cart" aria-label="Thêm vào giỏ">
-          <FontAwesomeIcon icon={faShoppingCart} />
-        </button>
-      </div>
+    <div className="related-card">
+  <Link to={`/san-pham/${p.duong_dan_ten_seo}`} className="related-link">
+    <div className="related-img-wrapper">
+      <img
+        src={getImageUrl(p.anh_dai_dien)}
+        alt={p.ten_san_pham}
+      />
     </div>
+
+    <div className="related-name">
+      {p.ten_san_pham}
+    </div>
+
+    <div className="related-price">
+      <del>{Number(p.gia_goc).toLocaleString("vi-VN")} đ</del>
+      <span className="new-price">
+        {Number(p.gia_khuyen_mai).toLocaleString("vi-VN")} đ
+      </span>
+    </div>
+  </Link>
+</div>
+
   ))}
 </div>
       </div>

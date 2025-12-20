@@ -12,39 +12,80 @@ function DatLaiMatKhau() {
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const submit = async (e) => {
-    e.preventDefault();
+  // const submit = async (e) => {
+  //   e.preventDefault();
 
-    if (!token) {
-      toast.error("Token không hợp lệ");
-      return;
-    }
+  //   if (!token) {
+  //     toast.error("Token không hợp lệ");
+  //     return;
+  //   }
 
-    if (password.length < 6) {
-      toast.error("Mật khẩu tối thiểu 6 ký tự");
-      return;
-    }
+  //   if (password.length < 6) {
+  //     toast.error("Mật khẩu tối thiểu 6 ký tự");
+  //     return;
+  //   }
 
-    if (password !== confirm) {
-      toast.error("Mật khẩu nhập lại không khớp");
-      return;
-    }
+  //   if (password !== confirm) {
+  //     toast.error("Mật khẩu nhập lại không khớp");
+  //     return;
+  //   }
 
-    try {
-      setLoading(true);
-      const res = await api.post("/auth/reset-password", {
+  //   try {
+  //     setLoading(true);
+  //     const res = await api.post("/auth/reset-password", {
+  //       token,
+  //       newPassword: password,
+  //     });
+
+  //     toast.success(res.data.message);
+  //     setTimeout(() => navigate("/dang-nhap"), 1500);
+  //   } catch (err) {
+  //     toast.error(err.response?.data?.message || "Có lỗi xảy ra");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+const submit = async (e) => {
+  e.preventDefault();
+
+  if (!token) {
+    toast.error("Token không hợp lệ");
+    return;
+  }
+
+  if (password.length < 6) {
+    toast.error("Mật khẩu tối thiểu 6 ký tự");
+    return;
+  }
+
+  if (password !== confirm) {
+    toast.error("Mật khẩu nhập lại không khớp");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const res = await api("/auth/reset-password", {
+      method: "POST",
+      body: {
         token,
-        newPassword: password,
-      });
+        newPassword: password
+      },
+      withCred: false   // BẮT BUỘC
+    });
 
-      toast.success(res.data.message);
-      setTimeout(() => navigate("/dang-nhap"), 1500);
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Có lỗi xảy ra");
-    } finally {
-      setLoading(false);
-    }
-  };
+    toast.success(res.message);
+    setTimeout(() => navigate("/dang-nhap"), 1500);
+
+  } catch (err) {
+    toast.error(err.message || "Có lỗi xảy ra");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="auth-container">

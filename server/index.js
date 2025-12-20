@@ -49,12 +49,14 @@ app.get("/api/health", (_req, res) => res.json({ ok: true }));
 app.use("/auth", require("./routes/authRoutes"));
 app.use("/products", require("./routes/productUserRoutes"));
 app.use("/stats", require("./routes/productUserRoutes"));
-app.use("/news", require("./routes/newsRoutes"));
+app.use("/news", require("./routes/newsUserRoutes"));
 app.use("/users", require("./routes/userRoutes"));
+app.use("/address", require("./routes/addressRoutes"));
 app.use("/admin/products", require("./routes/productRoutes"));
 app.use("/admin/brands", require("./routes/brandRoutes"));
 app.use("/admin/categories", require("./routes/categoryRoutes"));
-app.use("/api/customers", require("./routes/customerRoutes")); // nếu có
+app.use("/admin/news", require("./routes/newsRoutes"));
+app.use("/api/customers", require("./routes/customerRoutes")); 
 app.use("/api/cart", require("./routes/cartRoutes"));
 app.use("/api/orders", require("./routes/orderRoutes"));
 app.use("/api/reviews", require("./routes/reviewRoutes"));

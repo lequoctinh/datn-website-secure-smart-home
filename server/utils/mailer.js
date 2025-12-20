@@ -1,14 +1,15 @@
 const nodemailer = require("nodemailer");
+const transporter = require("../utils/mailer_ss");
 
-const transporter = nodemailer.createTransport({
-host: process.env.SMTP_HOST,
-port: Number(process.env.SMTP_PORT || 587),
-secure: String(process.env.SMTP_SECURE || "false") === "true",
-auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-},
-});
+// const transporter = nodemailer.createTransport({
+// host: process.env.SMTP_HOST,
+// port: Number(process.env.SMTP_PORT || 587),
+// secure: String(process.env.SMTP_SECURE || "false") === "true",
+// auth: {
+//     user: process.env.SMTP_USER,
+//     pass: process.env.SMTP_PASS,
+// },
+// });
 transporter.verify()
   .then(() => console.log("SMTP ready"))
   .catch(e => console.error("SMTP ERROR:", e.message));

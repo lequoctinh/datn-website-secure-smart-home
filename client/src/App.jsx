@@ -42,6 +42,9 @@ import CameraAccessories from "./pages/products/phukiencamera/PhuKienCamera";
 import SearchPage from "./pages/seach/SearchPage";
 import QuenMatKhau from "./pages/auth/components/QuenMatKhau";
 import DatLaiMatKhau from "./pages/auth/components/DatLaiMatKhau";
+import ScrollToTop from "./components/ScrollToTop";
+import CheckoutBuyNow from "./pages/cart/CheckoutBuyNow";
+
     
 
 
@@ -51,10 +54,13 @@ import DatLaiMatKhau from "./pages/auth/components/DatLaiMatKhau";
     const AdminUsers = lazy(() => import("./admin/pages/users/UsersList"));
     const AdminProducts = lazy(() => import("./admin/pages/products/ProductsList"));
     const AdminProductForm = lazy(() => import("./admin/pages/products/ProductForm"));
+    const AdminNewsList = lazy(() => import("./admin/pages/news/NewsList"));
+    const AdminNewsForm = lazy(() => import("./admin/pages/news/NewsForm"));
     const AdminBrands = lazy(() => import("./admin/pages/brands/BrandsList"));
     const AdminBrandForm = lazy(() => import("./admin/pages/brands/BrandForm"));
     const AdminOrdersList = lazy(() => import("./admin/pages/orders/AdminOrdersList"));
     const AdminOrderDetail = lazy(() => import("./admin/pages/orders/AdminOrderDetail"));
+    
 
     function App() {
       const location = useLocation();
@@ -83,6 +89,9 @@ import DatLaiMatKhau from "./pages/auth/components/DatLaiMatKhau";
                 <Route path="brands/:id" element={<AdminBrandForm />} />
                 <Route path="orders" element={<AdminOrdersList />} />
                 <Route path="orders/:id" element={<AdminOrderDetail />} />
+                <Route path="news" element={<AdminNewsList />} />
+                <Route path="news/new" element={<AdminNewsForm />} />
+                <Route path="news/:id" element={<AdminNewsForm />} />
                 
 
                             
@@ -92,6 +101,7 @@ import DatLaiMatKhau from "./pages/auth/components/DatLaiMatKhau";
 
       {!isAdminRoute && (
         <Layout>
+          <ScrollToTop /> 
           <ToastContainer
             position="top-center"
             autoClose={2200}
@@ -118,6 +128,7 @@ import DatLaiMatKhau from "./pages/auth/components/DatLaiMatKhau";
             <Route path="/cart" element={<CartPage />} />
             <Route path="/order-history" element={<OrderHistoryPage />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/checkout-buy-now" element={<CheckoutBuyNow />} />
             <Route path="/order/:id" element={<OrderDetailPage />} />
             <Route path="/order-success" element={<OrderSuccess />} />
             <Route path="/khoa-van-tay-bosch" element={<BoschFingerprintLock />} />

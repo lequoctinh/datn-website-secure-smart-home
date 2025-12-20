@@ -15,6 +15,9 @@
     object-fit: cover;
   
 }
+.ProductSmartLock-BannerPage{
+  padding: 0;
+}
 
 .pd-container-2{
   width: 80%;
@@ -506,7 +509,7 @@
   font-size: 16px;
   font-weight: 600;
   margin-top: 12px;
-  min-height: 45px;
+  min-height: 40px;
 }
 
 /* PRICE */

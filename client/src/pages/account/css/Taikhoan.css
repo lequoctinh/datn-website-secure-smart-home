@@ -453,3 +453,87 @@
     margin-bottom: 10px;
   }
 }
+
+.form-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1.5px solid #ddd;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.form-input:focus {
+  border-color: #ffa616a9;
+  box-shadow: 0 0 0 3px rgba(255, 166, 22, 0.319);
+  outline: none;
+}
+
+.gender-group{
+  display: contents;
+}
+.gender-item{
+  padding: 3px 10px;
+}
+
+
+
+
+
+
+.address-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.address-modal-card {
+  background: #fff;
+  width: 420px;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.address-modal-card h3 {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.cancel-btn {
+  background: #eee;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.form-input-address{
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1.5px solid #ddd;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+.form-input-address:focus {
+  border-color: #ffa616a9;
+  box-shadow: 0 0 0 3px rgba(255, 166, 22, 0.319);
+  outline: none;
+}

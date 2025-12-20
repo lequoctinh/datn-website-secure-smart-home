@@ -312,3 +312,60 @@ exports.deleteOrder = async (req, res) => {
     conn.release();
   }
 };
+
+exports.checkout = async (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: "Chưa đăng nhập" });
+    }
+
+    const userId = req.user.id;
+    const {  quantity, ten_nguoi_nhan, sdt, dia_chi } = req.body;
+    const variantId = req.body.variantId ?? req.body.productId;
+
+    if (!variantId || !quantity) {
+      return res.status(400).json({ message: "Thiếu variantId hoặc quantity" });
+    }
+
+    if (!ten_nguoi_nhan || !sdt || !dia_chi) {
+      return res.status(400).json({ message: "Thiếu thông tin người nhận" });
+    }
+
+    const [[variant]] = await pool.execute(
+      `SELECT gia FROM bien_the WHERE id = ?`,
+      [variantId]
+    );
+
+    if (!variant) {
+      return res.status(400).json({ message: "Biến thể không tồn tại" });
+    }
+
+    const total = Number(variant.gia) * Number(quantity);
+
+    const [order] = await pool.execute(
+      `INSERT INTO don_hang 
+       (nguoi_dung_id, tong_tien, ten_nguoi_nhan, sdt, dia_chi, trang_thai)
+       VALUES (?, ?, ?, ?, ?, 'pending')`,
+      [
+        userId,
+        total,
+        ten_nguoi_nhan ?? null,
+        sdt ?? null,
+        dia_chi ?? null
+      ]
+    );
+
+    await pool.execute(
+      `INSERT INTO don_hang_chi_tiet
+       (don_hang_id, bien_the_id, so_luong, don_gia)
+       VALUES (?, ?, ?, ?)`,
+      [order.insertId, variantId, quantity, variant.gia]
+    );
+
+    res.json({ ok: true, orderId: order.insertId });
+  } catch (err) {
+    console.error("CHECKOUT ERROR:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+

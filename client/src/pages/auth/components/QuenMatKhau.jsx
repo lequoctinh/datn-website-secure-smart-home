@@ -7,24 +7,50 @@ function QuenMatKhau() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const submit = async (e) => {
-    e.preventDefault();
-    if (!email) {
-      toast.error("Vui lòng nhập email");
-      return;
-    }
+  // const submit = async (e) => {
+  //   e.preventDefault();
+  //   if (!email) {
+  //     toast.error("Vui lòng nhập email");
+  //     return;
+  //   }
 
-    try {
-      setLoading(true);
-      const res = await api.post("/auth/forgot-password", { email });
-      toast.success(res.data.message);
-      setEmail("");
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Có lỗi xảy ra");
-    } finally {
-      setLoading(false);
-    }
-  };
+  //   try {
+  //     setLoading(true);
+  //     const res = await api.post("/auth/forgot-password", { email });
+  //     toast.success(res.data.message);
+  //     setEmail("");
+  //   } catch (err) {
+  //     toast.error(err.response?.data?.message || "Có lỗi xảy ra");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+const submit = async (e) => {
+  e.preventDefault();
+
+  if (!email) {
+    toast.error("Vui lòng nhập email");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const res = await api("/auth/forgot-password", {
+      method: "POST",
+      body: { email },
+      withCred: false   // RẤT QUAN TRỌNG
+    });
+
+    toast.success(res.message);
+    setEmail("");
+
+  } catch (err) {
+    toast.error(err.message || "Có lỗi xảy ra");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="auth-container">
