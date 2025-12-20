@@ -7,80 +7,48 @@ const CartPage = () => {
 
   // 🔥 Load cart từ DB
   useEffect(() => {
-    fetch("http://localhost:5000/api/cart", {
-      credentials: "include"
-    })
-      .then((res) => res.json())
-      .then((data) => {
-       if (data.ok) {
-          setCart(
-            data.data.map(item => ({
-              id: item.cart_item_id || item.id || "id",
-              bienthe: item.ten_bien_the || item.bienthe || "biến thể",
-              ten: item.ten_san_pham || item.ten || "Sản phẩm",
-              anh: item.anh_dai_dien || item.anh || "",
-              price: Number(item.gia) || Number(item.gia_khuyen_mai) || 0,
-              qty: Number(item.so_luong) || 1
-            }))
-          );
-        }
+  const savedCart = JSON.parse(localStorage.getItem("cart")) || [];
 
-        
-      })
-      .catch((err) => console.error("Lỗi tải giỏ hàng:", err));
-  }, []);
+  const normalized = savedCart.map(item => ({
+    ...item,
+    price: Number(item.price) || 0,
+    qty: Number(item.qty) || 1,
+  }));
 
-  // 🔥 Cập nhật số lượng vào DB
-  const updateQty = async (id, type) => {
-    const item = cart.find((i) => i.id === id);
-    if (!item) return;
+  setCart(normalized);
+}, []);
 
-    let newQty = item.qty;
-    if (type === "increase") newQty++;
-    if (type === "decrease") newQty = newQty > 1 ? newQty - 1 : 1;
 
-    // Gửi lên API
-    const res = await fetch("http://localhost:5000/api/cart/update", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({
-        id,                // ID trong bảng giỏ hàng
-        so_luong: newQty,  // số lượng mới
-      }),
-    });
+  // Tăng / giảm số lượng
+  const updateQty = (id, type) => {
+  const newCart = cart.map((item) => {
+    if (item.id === id) {
+      let newQty = Number(item.qty);
 
-    const data = await res.json();
+      if (type === "increase") newQty++;
+      if (type === "decrease") newQty = newQty > 1 ? newQty - 1 : 1;
 
-    if (data.ok) {
-      // Cập nhật UI
-      setCart((prev) =>
-        prev.map((i) => (i.id === id ? { ...i, qty: newQty } : i))
-      );
-    } else {
-      alert(data.message || "Lỗi cập nhật số lượng");
+      return { ...item, qty: newQty };
     }
-  };
+    return item;
+  });
 
-  // 🔥 Xóa sản phẩm
-  const removeItem = async (id) => {
-    const res = await fetch(`http://localhost:5000/api/cart/${id}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
+  setCart(newCart);
+  localStorage.setItem("cart", JSON.stringify(newCart));
+};
 
-    const data = await res.json();
-
-    if (data.ok) {
-      setCart(cart.filter((item) => item.id !== id));
-    }
+  // Xóa sp
+  const removeItem = (id) => {
+    const newCart = cart.filter((item) => item.id !== id);
+    setCart(newCart);
+    localStorage.setItem("cart", JSON.stringify(newCart));
   };
 
   // 🔥 Tính tổng tiền
   const subtotal = cart.reduce(
-    (sum, item) => sum + item.price * item.qty,
-    0
-  );
+  (sum, item) => sum + (Number(item.price) || 0) * (Number(item.qty) || 1),
+  0
+);
 
   const handleCheckout = () => {
     if (cart.length === 0) {
@@ -126,7 +94,6 @@ const CartPage = () => {
                     <input
                       type="text"
                       value={item.qty}
-                      readOnly
                       className="w-10 text-center border-t border-b"
                     />
 
@@ -139,7 +106,7 @@ const CartPage = () => {
                 <div className="text-right">
 
                   <p className="font-semibold mt-2 text-yellow-700">
-                    {(item.qty * item.price).toLocaleString()} ₫
+                    {(item.price * item.qty).toLocaleString()} ₫
                   </p>
 
                   <button

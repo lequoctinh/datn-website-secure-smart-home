@@ -6,6 +6,9 @@ export default function Checkout() {
   const [shipping, setShipping] = useState("standard");
   const [payment, setPayment] = useState("cod");
   const navigate = useNavigate();
+  // Lấy user (sau đăng nhập sẽ lưu vào localStorage)
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+
 
 
   // Thông tin giao hàng
@@ -19,6 +22,14 @@ export default function Checkout() {
     address_line: "",
     note: "",
   });
+  // Chuẩn hóa phương thức thanh toán để backend + frontend trùng nhau
+const mapPayment = (method) => {
+  if (method === "cod") return "COD";
+  if (method === "vnpay") return "VNPAY";
+  if (method === "momo") return "MoMo";
+  return method.toUpperCase();
+};
+
 
   // Giỏ hàng
   const [items, setItems] = useState([]);
@@ -50,21 +61,22 @@ export default function Checkout() {
       return;
     }
 
-    const payload = {
-      user_id: null, // hoặc lấy từ JWT nếu bạn có auth
-      payment_method: payment,
-      shipping_fee: shippingFee,
-      discount: 0,
-      note: form.note,
-      items: items.map((item) => ({
-        product_id: item.id || item.product_id || null,
-        product_name: item.name,
-        product_image: item.image,
-        unit_price: Number(item.price || item.unit_price),
-        quantity: Number(item.quantity),
-      })),
-      address: form,
-    };
+const payload = {
+  user_id: user ? user.id : null,
+  payment_method: mapPayment(payment),
+  shipping_fee: shippingFee,
+  discount: 0,
+  note: form.note,
+  items: items.map((item) => ({
+    product_id: item.id || item.product_id || null,
+    product_name: item.name,
+    product_image: item.image,
+    unit_price: Number(item.price || item.unit_price),
+    quantity: Number(item.quantity),
+  })),
+  address: form,
+};
+
 
     try {
       const res = await fetch(
