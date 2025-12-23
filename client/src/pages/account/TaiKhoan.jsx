@@ -12,7 +12,16 @@ import { MapPin, Plus, Edit2, CheckCircle } from 'lucide-react';
 const TaiKhoan = () => {
   const [activeTab, setActiveTab] = useState('orders'); // Mặc định vào tab Đơn hàng
   const navigate = useNavigate();
-  const { me, logout } = useAuth();
+  const { me, logout } = useAuth(); 
+
+//state đánh giá
+  // const [reviews, setReviews] = useState([]);
+  const [editingReview, setEditingReview] = useState(null);
+  const [reviewForm, setReviewForm] = useState({
+    so_sao: 5,
+    noi_dung: ''
+  });
+
 
   // State lưu danh sách đơn hàng lấy từ DB
   const [orders, setOrders] = useState([]);
@@ -139,6 +148,30 @@ const deleteAddress = async (id) => {
   );
   fetchAddresses();
 };
+
+ const [myReviews, setMyReviews] = useState([]); 
+
+const fetchMyReviews = async () => {
+  try {
+    const res = await axios.get(
+      "http://localhost:5000/api/reviews/my",
+      { withCredentials: true }
+    );
+
+    if (res.data.ok) {
+      setMyReviews(res.data.reviews);
+    }
+  } catch (err) {
+    console.error("Lỗi lấy đánh giá:", err);
+  }
+  console.log("My reviews:", myReviews);
+
+};
+
+useEffect(() => {
+  if (activeTab === 'reviews') fetchMyReviews();
+}, [activeTab]);
+
 
 
 
@@ -279,7 +312,8 @@ const deleteAddress = async (id) => {
     { id: 'profile', label: 'Hồ sơ của tôi', icon: <User size={18} /> },
     { id: 'orders', label: 'Danh sách đơn hàng', icon: <FileText size={18} /> },
     { id: 'addresses', label: 'Quản lý địa chỉ', icon: <MapPin size={18} /> },
-    { id: 'settings', label: 'Cài đặt', icon: <Settings size={18} /> },
+    { id: 'reviews', label: 'Đánh giá của tôi', icon: <FileText size={18} /> },
+    // { id: 'settings', label: 'Cài đặt', icon: <Settings size={18} /> },
   ];
   // Danh sách Menu
   
@@ -493,148 +527,297 @@ const avatarSrc = "/img/avatar.webp";
                   </button>
                 </div>
 
-                {showAddressForm && (
-                  <div className="address-modal">
-                    <div className="address-modal-card">
-                      <h3>
-                        {editingAddress ? 'Cập nhật địa chỉ' : 'Thêm địa chỉ mới'}
-                      </h3>
-
-                      <div className="form-group">
-                        <label>Họ tên *</label>
-                        <input
-                          className='form-input-address'
-                          name="ho_ten"
-                          value={addressForm.ho_ten}
-                          onChange={handleAddressChange}
-                        />
+               {showAddressForm && (
+                  <div className="address-overlay">
+                    <div className="address-card">
+                      <div className="address-header">
+                        <h3>
+                          {editingAddress ? 'Cập nhật địa chỉ' : 'Thêm địa chỉ mới'}
+                        </h3>
+                        <button
+                          className="close-btn"
+                          onClick={() => setShowAddressForm(false)}
+                        >
+                          ×
+                        </button>
                       </div>
 
-                      <div className="form-group">
-                        <label>Số điện thoại *</label>
-                        <input
-                          className='form-input-address'
-                          name="sdt"
-                          value={addressForm.sdt}
-                          onChange={handleAddressChange}
-                        />
+                      <div className="address-form-grid">
+                        <div className="form-group">
+                          <label>Họ tên *</label>
+                          <input
+                            name="ho_ten"
+                            value={addressForm.ho_ten}
+                            onChange={handleAddressChange}
+                            placeholder="Nguyễn Văn A"
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label>Số điện thoại *</label>
+                          <input
+                            name="sdt"
+                            value={addressForm.sdt}
+                            onChange={handleAddressChange}
+                            placeholder="0123 456 789"
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label>Tỉnh / Thành phố *</label>
+                          <input
+                            name="tinh_thanh"
+                            value={addressForm.tinh_thanh}
+                            onChange={handleAddressChange}
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label>Quận / Huyện *</label>
+                          <input
+                            name="quan_huyen"
+                            value={addressForm.quan_huyen}
+                            onChange={handleAddressChange}
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label>Phường / Xã *</label>
+                          <input
+                            name="phuong_xa"
+                            value={addressForm.phuong_xa}
+                            onChange={handleAddressChange}
+                          />
+                        </div>
+
+                        <div className="form-group full">
+                          <label>Địa chỉ cụ thể *</label>
+                          <input
+                            name="dia_chi"
+                            value={addressForm.dia_chi}
+                            onChange={handleAddressChange}
+                            placeholder="Số nhà, tên đường..."
+                          />
+                        </div>
+
+                        <div className="form-group full">
+                          <label>Ghi chú</label>
+                          <textarea
+                            name="ghi_chu"
+                            value={addressForm.ghi_chu}
+                            onChange={handleAddressChange}
+                            rows="3"
+                          />
+                        </div>
                       </div>
 
-                      <div className="form-group">
-                        <label>Tỉnh / Thành phố *</label>
-                        <input
-                          className='form-input-address'
-                          name="tinh_thanh"
-                          value={addressForm.tinh_thanh}
-                          onChange={handleAddressChange}
-                        />
-                      </div>
-
-                      <div className="form-group">
-                        <label>Quận / Huyện *</label>
-                        <input
-                          className='form-input-address'
-                          name="quan_huyen"
-                          value={addressForm.quan_huyen}
-                          onChange={handleAddressChange}
-                        />
-                      </div>
-
-                      <div className="form-group">
-                        <label>Phường / Xã *</label>
-                        <input
-                          className='form-input-address'
-                          name="phuong_xa"
-                          value={addressForm.phuong_xa}
-                          onChange={handleAddressChange}
-                        />
-                      </div>
-
-                      <div className="form-group">
-                        <label>Địa chỉ cụ thể *</label>
-                        <input
-                          className='form-input-address'
-                          name="dia_chi"
-                          value={addressForm.dia_chi}
-                          onChange={handleAddressChange}
-                        />
-                      </div>
-
-                      <div className="form-group">
-                        <label>Ghi chú</label>
-                        <textarea
-                          className='form-input-address'
-                          name="ghi_chu"
-                          value={addressForm.ghi_chu}
-                          onChange={handleAddressChange}
-                        />
-                      </div>
-
-                      <label className="checkbox-row">
+                      <label className="default-checkbox">
                         <input
                           type="checkbox"
                           name="mac_dinh"
                           checked={addressForm.mac_dinh}
                           onChange={handleAddressChange}
                         />
-                        Đặt làm địa chỉ mặc định
+                        <span>Đặt làm địa chỉ mặc định</span>
                       </label>
 
-                      <div className="modal-actions">
-                        <button className="save-btn" onClick={submitAddress}>
-                          {editingAddress ? 'Cập nhật' : 'Thêm mới'}
-                        </button>
-                        <button
-                          className="cancel-btn"
-                          onClick={() => setShowAddressForm(false)}
-                        >
+                      <div className="address-actions">
+                        <button className="btn-outline" onClick={() => setShowAddressForm(false)}>
                           Huỷ
+                        </button>
+                        <button className="btn-primary" onClick={submitAddress}>
+                          {editingAddress ? 'Cập nhật' : 'Thêm mới'}
                         </button>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {loadingAddress ? (
-                  <p>Đang tải địa chỉ...</p>
+
+
+
+               {loadingAddress ? (
+                  <div className="address-loading">Đang tải địa chỉ...</div>
                 ) : addresses.length === 0 ? (
-                  <p style={{color:'#666'}}>Bạn chưa có địa chỉ nào.</p>
+                  <div className="address-empty">Bạn chưa có địa chỉ nào.</div>
                 ) : (
                   <div className="address-list">
-                    {addresses.map(addr => (
-                      <div key={addr.id} className={`address-card ${addr.mac_dinh ? 'default' : ''}`}>
-                        <div className="address-header">
-                          <strong>{addr.ho_ten}</strong>
-                          {addr.mac_dinh && <span className="badge">Mặc định</span>}
-                        </div>
+                    {addresses.map((addr) => {
+                      const isDefault = addr.mac_dinh === 1;
 
-                        <p>{addr.sdt}</p>
-                        <p>
-                          {addr.dia_chi}, {addr.phuong_xa}, {addr.quan_huyen}, {addr.tinh_thanh}
-                        </p>
+                      return (
+                        <div
+                          key={addr.id}
+                          className={`address-item ${isDefault ? 'is-default' : ''}`}
+                        >
+                          {/* LEFT: Info */}
+                          <div className="address-left">
+                            <div className="address-item-header">
+                              <div className="name">
+                                {addr.ho_ten}
+                                {isDefault && (
+                                  <span className="badge-default">Mặc định</span>
+                                )}
+                              </div>
+                              
+                            </div>
 
-                        <div className="address-actions">
-                          {!addr.mac_dinh && (
-                            <button onClick={() => setDefaultAddress(addr.id)}>
-                              <CheckCircle size={14}/> Đặt mặc định
+                            <div className="address-item-body">
+                              <div className="phone">{addr.sdt}</div>
+                              {addr.dia_chi}, {addr.phuong_xa}, {addr.quan_huyen}, {addr.tinh_thanh}
+                            </div>
+                          </div>
+
+                          {/* RIGHT: Actions */}
+                          <div className="address-right">
+                            {!isDefault && (
+                              <button
+                                className="btn btn-set-default"
+                                onClick={() => setDefaultAddress(addr.id)}
+                              >
+                                Đặt mặc định
+                              </button>
+                            )}
+
+                            <button
+                              className="btn btn-edit"
+                              onClick={() => handleEditAddress(addr)}
+                            >
+                              Sửa
                             </button>
-                          )}
-                          <button onClick={() => handleEditAddress(addr)}>
-                            <Edit2 size={14}/> Sửa
-                          </button>
-                          <button className="danger" onClick={() => deleteAddress(addr.id)}>
-                            <Trash2 size={14}/> Xoá
-                          </button>
+
+                            <button
+                              className="btn btn-delete"
+                              onClick={() => deleteAddress(addr.id)}
+                            >
+                              Xóa
+                            </button>
+                          </div>
                         </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+
+              </div>
+            )}
+
+            
+           {activeTab === 'reviews' && (
+              <div className="reviews-content fade-in">
+                <h2 className="section-title">Đánh giá của tôi</h2>
+
+                {myReviews.length === 0 ? (
+                  <p style={{ color: "#666" }}>Bạn chưa có đánh giá nào.</p>
+                ) : (
+                  <div className="review-list">
+                    {myReviews.map(rv => (
+                      <div key={rv.id} className="review-card grid-layout">
+
+                        {/* Cột 1: Ảnh sản phẩm */}
+                        <img
+                          src={rv.anh_dai_dien}
+                          alt={rv.ten_san_pham}
+                          className="review-img"
+                          onError={e => (e.target.src = "https://via.placeholder.com/80")}
+                        />
+
+                        {/* Cột 2: Nội dung */}
+                        <div className="review-content">
+                          <h4 className="product-name">{rv.ten_san_pham}</h4>
+
+                          <div className="rating">
+                            ⭐ {rv.so_sao}/5
+                          </div>
+
+                          <p className="review-date">
+                            Ngày đánh giá: {formatDate(rv.ngay_tao)}
+                          </p>
+
+                          {editingReview === rv.id ? (
+                            <div className="review-edit-box">
+                              <select
+                                value={reviewForm.so_sao}
+                                onChange={e =>
+                                  setReviewForm({ ...reviewForm, so_sao: e.target.value })
+                                }
+                              >
+                                {[1, 2, 3, 4, 5].map(s => (
+                                  <option key={s} value={s}>
+                                    {s} sao
+                                  </option>
+                                ))}
+                              </select>
+
+                              <textarea
+                                value={reviewForm.noi_dung}
+                                onChange={e =>
+                                  setReviewForm({ ...reviewForm, noi_dung: e.target.value })
+                                }
+                                placeholder="Nhập nội dung đánh giá..."
+                              />
+
+                              <div style={{ display: "flex", gap: 10 }}>
+                                <button
+                                  className="save-btn"
+                                  onClick={async () => {
+                                    try {
+                                      await axios.put(
+                                        `http://localhost:5000/api/reviews/danh-gia/${rv.id}`,
+                                        reviewForm,
+                                        { withCredentials: true }
+                                      );
+                                      toast.success("Đã cập nhật đánh giá");
+                                      setEditingReview(null);
+                                      fetchMyReviews();
+                                    } catch {
+                                      toast.error("Lỗi khi cập nhật đánh giá");
+                                    }
+                                  }}
+                                >
+                                  Lưu
+                                </button>
+
+                                <button
+                                  className="cancel-btn"
+                                  onClick={() => setEditingReview(null)}
+                                >
+                                  Huỷ
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="review-text">“{rv.noi_dung}”</p>
+                          )}
+                        </div>
+
+                        {/* Cột 3: Hành động bên phải */}
+                        {editingReview !== rv.id && (
+                          <div className="review-actions">
+                            <button
+                              className="btn-icon edit"
+                              title="Chỉnh sửa"
+                              onClick={() => {
+                                setEditingReview(rv.id);
+                                setReviewForm({
+                                  so_sao: rv.so_sao,
+                                  noi_dung: rv.noi_dung
+                                });
+                              }}
+                            >
+                              <Edit2 size={16} />
+                            </button>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
                 )}
               </div>
+
             )}
 
-            
-            {activeTab === 'settings' && <div>Chức năng đang cập nhật...</div>}
           </main>
         </div>
       </div>

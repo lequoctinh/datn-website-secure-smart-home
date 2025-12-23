@@ -90,3 +90,86 @@
       res.status(500).json({ ok: false, message: "Lỗi server!" });
     }
   };
+
+
+  exports.updateReview = async (req, res) => {
+  const userId = req.user.id;
+  const { id } = req.params;
+  const { noi_dung, so_sao } = req.body;
+
+  if (!noi_dung && !so_sao) {
+    return res.status(400).json({
+      ok: false,
+      message: "Không có dữ liệu cập nhật"
+    });
+  }
+
+  try {
+    // 1️⃣ Kiểm tra quyền
+    const [rows] = await pool.query(
+      `SELECT id FROM danh_gia WHERE id = ? AND nguoi_dung_id = ?`,
+      [id, userId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(403).json({
+        ok: false,
+        message: "Bạn không có quyền sửa đánh giá này"
+      });
+    }
+
+    // 2️⃣ Update
+    await pool.query(
+      `
+      UPDATE danh_gia
+      SET 
+        noi_dung = COALESCE(?, noi_dung),
+        so_sao = COALESCE(?, so_sao)
+      WHERE id = ?
+      `,
+      [noi_dung || null, so_sao || null, id]
+    );
+
+    res.json({
+      ok: true,
+      message: "Cập nhật đánh giá thành công"
+    });
+  } catch (err) {
+    console.error("UPDATE REVIEW ERROR:", err);
+    res.status(500).json({
+      ok: false,
+      message: "Lỗi server"
+    });
+  }
+};
+
+
+  exports.getMyReviews = async (req, res) => {
+  const userId = req.user.id;
+    console.log("USER ID:", req.user.id);
+  try {
+    const [rows] = await pool.query(
+      `
+      SELECT 
+        dg.id,
+        dg.so_sao,
+        dg.noi_dung,
+        dg.ngay_tao,
+        sp.id AS san_pham_id,
+        sp.ten_san_pham,
+        sp.anh_dai_dien
+      FROM danh_gia dg
+      JOIN san_pham sp ON dg.san_pham_id = sp.id
+      WHERE dg.nguoi_dung_id = ?
+      ORDER BY dg.ngay_tao DESC
+      `,
+      [userId]
+    );
+
+    res.json({ ok: true, reviews: rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, message: "Lỗi server" });
+  }
+};
+

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { api } from "../../../lib/api";
 import { toast } from "react-toastify";
+import { Link } from "react-router-dom";
 
 function DatLaiMatKhau() {
   const [searchParams] = useSearchParams();
@@ -12,39 +13,6 @@ function DatLaiMatKhau() {
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // const submit = async (e) => {
-  //   e.preventDefault();
-
-  //   if (!token) {
-  //     toast.error("Token không hợp lệ");
-  //     return;
-  //   }
-
-  //   if (password.length < 6) {
-  //     toast.error("Mật khẩu tối thiểu 6 ký tự");
-  //     return;
-  //   }
-
-  //   if (password !== confirm) {
-  //     toast.error("Mật khẩu nhập lại không khớp");
-  //     return;
-  //   }
-
-  //   try {
-  //     setLoading(true);
-  //     const res = await api.post("/auth/reset-password", {
-  //       token,
-  //       newPassword: password,
-  //     });
-
-  //     toast.success(res.data.message);
-  //     setTimeout(() => navigate("/dang-nhap"), 1500);
-  //   } catch (err) {
-  //     toast.error(err.response?.data?.message || "Có lỗi xảy ra");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
 const submit = async (e) => {
   e.preventDefault();
@@ -88,30 +56,63 @@ const submit = async (e) => {
 
 
   return (
-    <div className="auth-container">
-      <h2>Đặt lại mật khẩu</h2>
+  <div className="auth-page">
+    <div className="container-auth mx-auto p-6 md:p-8">
+      <div className="nh-auth-shell">
+        <div className="nh-card max-w-md mx-auto">
+          <header className="form-head mb-6">
+            <h2 className="text-2xl md:text-3xl form-title">
+              Đặt lại mật khẩu
+            </h2>
+            <p className="form-subtitle mt-1">
+              Vui lòng nhập mật khẩu mới cho tài khoản của bạn
+            </p>
+          </header>
 
-      <form onSubmit={submit} className="auth-form">
-        <input
-          type="password"
-          placeholder="Mật khẩu mới"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+          <form onSubmit={submit} className="space-y-4">
+            <div>
+              <label className="form-label">Mật khẩu mới</label>
+              <input
+                type="password"
+                className="form-input w-full"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
 
-        <input
-          type="password"
-          placeholder="Nhập lại mật khẩu"
-          value={confirm}
-          onChange={(e) => setConfirm(e.target.value)}
-        />
+            <div>
+              <label className="form-label">Nhập lại mật khẩu</label>
+              <input
+                type="password"
+                className="form-input w-full"
+                placeholder="••••••••"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+              />
+            </div>
 
-        <button disabled={loading}>
-          {loading ? "Đang xử lý..." : "Đặt lại mật khẩu"}
-        </button>
-      </form>
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn btn-primary w-full"
+            >
+              {loading ? "Đang xử lý..." : "Đặt lại mật khẩu"}
+            </button>
+          </form>
+
+          <div className="nh-auth-foot mt-4">
+            <Link to="/auth-page" className="nh-link">
+              ← Quay lại đăng nhập
+            </Link>
+          </div>
+        </div>
+      </div>
     </div>
-  );
+  </div>
+);
+
+
 }
 
 export default DatLaiMatKhau;

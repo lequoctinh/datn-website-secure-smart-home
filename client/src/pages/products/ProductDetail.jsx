@@ -208,6 +208,10 @@ const submitReview = async () => {
     toast.error("Hãy chọn số sao!");
     return;
   }
+  if (!comment.trim()) {
+  toast.error("Vui lòng nhập nội dung đánh giá");
+  return;
+}
 
   const token = localStorage.getItem("token");
 
@@ -217,19 +221,20 @@ const submitReview = async () => {
   }
 
   try {
-    await axios.post(
-      `${BACKEND_URL}/api/reviews`,
-      {
-        productId: product.id,
-        so_sao: rating,
-        noi_dung: comment,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+   await axios.post(
+  "http://localhost:5000/api/reviews",
+  {
+    productId: product.id, 
+    rating: rating,        
+    comment: comment,     
+  },
+  { withCredentials: true }
+);
+    console.log({
+  san_pham_id: product.id,
+  so_sao: rating,
+  noi_dung: comment,
+  });
 
     toast.success("Đánh giá thành công");
     loadReviews(product.id);
@@ -448,7 +453,7 @@ const submitReview = async () => {
       </div> */}
 
     <div style={{ marginTop: 20 }}>
-        <div style={{ marginBottom: 8, fontWeight: 700 }}>Viết đánh giá</div>
+        <div className="text-xl border-b-2 border-[#C9AC68] inline-block pb-2 mb-4" style={{ marginBottom: 8, fontWeight: 700 }}>Viết đánh giá</div>
         <div>
           {[1, 2, 3, 4, 5].map((num) => (
             <span
@@ -483,30 +488,25 @@ const submitReview = async () => {
 
 
           <div className="mt-6">
-        <h3 className="text-xl font-bold">Đánh giá sản phẩm</h3>
+        <h3 className="text-xl font-bold border-b-2 border-[#C9AC68] inline-block pb-2 mb-4">Đánh giá sản phẩm</h3>
 
         {reviews.length === 0 && <p>Chưa có đánh giá nào</p>}
 
-        {/* {reviews.map((r) => (
-          <div key={r.id || r.review_id} className="border-b py-3">
-            <div className="font-semibold">{r.user_name || r.name}</div>
-            <div style={{ color: "#f6c945" }}>{Array.from({ length: r.rating }).map(() => "★").join("")}{Array.from({ length: 5 - r.rating }).map(() => "☆").join("")}</div>
-            <div>{r.comment}</div>
-            <div className="text-gray-500 text-sm">{new Date(r.created_at || r.createdAt).toLocaleDateString()}</div>
-          </div>
-        ))} */}
-        {reviews.map((r) => (
+       {reviews.map((r) => (
           <div key={r.id} className="border-b py-3">
-            <div className="font-semibold">{r.user_name}</div>
-
-            <div style={{ color: "#f6c945", fontSize: 20 }}>
-              {"★".repeat(r.so_sao)}{"☆".repeat(5 - r.so_sao)}
+            <div className="font-semibold">
+              {r.user_name}
             </div>
 
-            <div>{r.noi_dung}</div>
+            <div style={{ color: "#f6c945", fontSize: 20 }}>
+              {"★".repeat(r.rating)}
+              {"☆".repeat(5 - r.rating)}
+            </div>
+
+            <div>{r.comment}</div>
 
             <div className="text-gray-500 text-sm">
-              {new Date(r.ngay_tao).toLocaleDateString("vi-VN")}
+              {new Date(r.created_at).toLocaleDateString("vi-VN")}
             </div>
           </div>
         ))}
